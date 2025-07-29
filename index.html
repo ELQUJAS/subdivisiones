@@ -416,8 +416,7 @@
                 var centroid = layerFound.getBounds().getCenter(); // Obtiene el centroide de la subdivisión
                 var rolValue = layerFound.feature.properties['rol']; // Obtiene el valor del ROL
 
-                // Crea y añade un marcador PREDETERMINADO (el pin azul de Leaflet)
-                // con el ROL como texto en el popup
+                // CORRECCIÓN: Usar L.marker en lugar de L.circleMarker
                 rolSearchMarker = L.marker(centroid).addTo(map)
                     .bindPopup('<b>ROL:</b> ' + (rolValue !== null ? autolinker.link(String(rolValue).replace(/'/g, '\'').toLocaleString()) : 'No disponible'))
                     .openPopup();
@@ -428,7 +427,6 @@
                 // Abre el popup de la subdivisión completa (con los desplegables)
                 // Nota: Este popup se mostrará al lado del marcador, proporcionando la información detallada.
                 layerFound.openPopup();
-
 
                 // Para asegurar que el popup del rol y el marcador se cierren si el usuario hace clic en otro lado
                 map.on('click', cleanUpTemporaryMarkers);
