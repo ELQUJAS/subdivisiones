@@ -180,7 +180,7 @@
                 display: flex;
                 flex-direction: column;
                 align-items: flex-start;
-                margin-top: 10px; /* Espacio debajo del control de zoom */
+                /* Eliminamos el margin-top de aquí, lo controlaremos con JS */
             }
 
             .rol-buscador input {
@@ -634,7 +634,10 @@
                     const zoomRect = zoomControlElement.getBoundingClientRect();
                     const mapRect = map.getContainer().getBoundingClientRect();
                     
-                    rolSearchControlElement.style.top = (zoomRect.bottom - mapRect.top + 10) + 'px'; // 10px de margen
+                    // Ajustamos el valor 'top' para moverlo más arriba
+                    // Antes: (zoomRect.bottom - mapRect.top + 10) + 'px';
+                    // Nuevo: Un valor fijo o una resta mayor para subirlo
+                    rolSearchControlElement.style.top = (zoomRect.top - mapRect.top + 5) + 'px'; // Puedes ajustar '5' por un valor negativo si quieres que se superponga, o positivo para más espacio.
                     rolSearchControlElement.style.left = '10px';
                 }
             }, 500);
@@ -682,11 +685,11 @@
                         const suggestionItem = document.createElement('div');
                         suggestionItem.classList.add('sugerencia-item');
                         suggestionItem.textContent = rol;
-                        suggestionItem.addEventListener('mousedown', function(e) { // Usar mousedown para evitar blur antes del click
-                            e.preventDefault(); // Evitar que el input pierda el foco inmediatamente
+                        suggestionItem.addEventListener('mousedown', function(e) { 
+                            e.preventDefault(); 
                             rolInput.value = rol; 
                             hideRolSuggestions(); 
-                            buscarRolBoton.click(); // Disparar la búsqueda
+                            buscarRolBoton.click(); 
                         });
                         rolSugerenciasDiv.appendChild(suggestionItem);
                     });
@@ -706,8 +709,6 @@
                 // Determinar si el clic fue en un popup de una característica de capa normal (no de búsqueda)
                 let clickedOnNormalFeaturePopup = false;
                 if (map.getPopup() && map.getPopup()._source && layer_Subdivisiones20232024_2.hasLayer(map.getPopup()._source)) {
-                    // Si el popup abierto corresponde a una capa de subdivisiones Y no es el 'currentRolFeaturePopup'
-                    // (el que se abrió por la búsqueda), entonces es un popup normal.
                     if (map.getPopup()._source !== currentRolFeaturePopup) {
                          clickedOnNormalFeaturePopup = true;
                     }
@@ -717,9 +718,6 @@
                 // O si el clic fue en el propio marcador de búsqueda o el popup de la feature buscada (para cerrarlos)
                 // O si no hay marcadores/popups de búsqueda activos y el clic es en el mapa.
                 if (!clickedOnNormalFeaturePopup) {
-                    // Si el clic fue en el mapa y no en un elemento interactivo que abre un popup, o si se hace click
-                    // en el marcador de búsqueda o el popup de la feature buscada para cerrarlo,
-                    // entonces proceder a limpiar.
                     cleanUpTemporaryMarkers();
                 }
             });
@@ -727,9 +725,7 @@
 
             // Ocultar sugerencias cuando se pierde el foco del input, a menos que el foco vaya a una sugerencia
             rolInput.addEventListener('blur', function() {
-                // Usamos un pequeño retraso para permitir que el evento mousedown de la sugerencia se dispare primero
                 setTimeout(() => { 
-                    // Si el elemento activo NO es una sugerencia ni el propio input
                     if (!rolSugerenciasDiv.contains(document.activeElement) && document.activeElement !== rolInput) {
                         hideRolSuggestions();
                     }
@@ -738,7 +734,7 @@
 
 
             buscarRolBoton.addEventListener('click', function() {
-                cleanUpTemporaryMarkers(); // Limpiar antes de iniciar una nueva búsqueda
+                cleanUpTemporaryMarkers(); 
 
                 const rolValue = rolInput.value.trim();
                 resultadoRolDiv.textContent = '';
@@ -761,25 +757,20 @@
                     const center = foundFeature.getBounds().getCenter();
                     map.setView(center, 17); 
 
-                    // Añadir el marcador personalizado
                     rolSearchMarker = L.marker(center, {icon: rolIcon}).addTo(map);
                     rolSearchMarker.bindPopup(`<b>ROL Encontrado:</b> ${rolValue}`); 
-                    rolSearchMarker.openPopup(); // Abrir popup del marcador también
+                    rolSearchMarker.openPopup(); 
 
-                    // Asegurarnos de que el popup de la feature se abra y lo referenciamos
-                    // Es importante que el popup de la feature sea el último en abrirse si ambos van a estar visibles
                     setTimeout(() => {
                         foundFeature.openPopup(center);
-                        currentRolFeaturePopup = foundFeature.getPopup(); // Obtener la referencia al popup real
-                        // Escuchar el cierre del popup de la feature buscada
+                        currentRolFeaturePopup = foundFeature.getPopup(); 
                         if (currentRolFeaturePopup) {
-                            currentRolFeaturePopup.on('remove', function() { // Usar 'remove' para cuando el popup se cierra o se quita del mapa
+                            currentRolFeaturePopup.on('remove', function() { 
                                 cleanUpTemporaryMarkers();
                             });
                         }
                     }, 200); 
 
-                    // Escuchar el cierre del popup del marcador de búsqueda
                     if (rolSearchMarker) {
                         rolSearchMarker.on('popupclose', function() {
                             cleanUpTemporaryMarkers();
