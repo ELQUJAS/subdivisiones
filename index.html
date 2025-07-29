@@ -435,7 +435,8 @@
                 var centroid = layerFound.getBounds().getCenter(); // Obtiene el centroide de la subdivisión
                 var rolValue = layerFound.feature.properties['rol']; // Obtiene el valor del ROL
 
-                // *** ESTE ES EL CÓDIGO CLAVE PARA AÑADIR EL MARCADOR AL BUSCADOR DE ROL ***
+                // *** CÓDIGO CLAVE PARA AÑADIR EL MARCADOR AL BUSCADOR DE ROL ***
+                // Crea un nuevo marcador de Leaflet estándar (el pin azul)
                 rolSearchMarker = L.marker(centroid).addTo(map)
                     .bindPopup('<b>ROL:</b> ' + (rolValue !== null ? autolinker.link(String(rolValue).replace(/'/g, '\'').toLocaleString()) : 'No disponible'))
                     .openPopup(); // Abre el popup del marcador
