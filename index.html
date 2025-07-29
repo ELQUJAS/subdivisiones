@@ -424,7 +424,7 @@
 
             // Variables globales para almacenar los marcadores temporales
             var coordSearchMarker = null;
-            var rolSearchMarker = null; // Nuevo: Marcador para la búsqueda de rol
+            var rolSearchMarker = null; // Marcador para la búsqueda de rol
 
             // Función para limpiar cualquier marcador temporal activo
             function cleanUpTemporaryMarkers() {
@@ -622,6 +622,7 @@
 
                 let foundFeature = null;
                 layer_Subdivisiones20232024_2.eachLayer(function(layer) {
+                    // Normalize both values for robust comparison
                     if (layer.feature && layer.feature.properties && String(layer.feature.properties['rol']).trim().toLowerCase() === rolValue.toLowerCase()) {
                         foundFeature = layer;
                         return; // Salir del bucle una vez encontrado
@@ -629,16 +630,19 @@
                 });
 
                 if (foundFeature) {
-                    // Obtener el centro del polígono para el zoom
                     const center = foundFeature.getBounds().getCenter();
                     map.setView(center, 17); // Zoom a un nivel cercano (ej: 17)
 
                     // Añadir el marcador personalizado
                     rolSearchMarker = L.marker(center, {icon: rolIcon}).addTo(map);
-                    rolSearchMarker.bindPopup(`<b>ROL Encontrado:</b> ${rolValue}<br>Haga clic fuera para cerrar.`).openPopup();
+                    rolSearchMarker.bindPopup(`<b>ROL Encontrado:</b> ${rolValue}`).openPopup(); // Simplificado, el principal es el de la capa
 
-                    // Abrir el popup de la capa de subdivisiones también
-                    foundFeature.openPopup(center);
+                    // Abrir el popup de la capa de subdivisiones
+                    // Usamos setTimeout para asegurar que el mapa se ha reposicionado antes de abrir el popup,
+                    // lo que puede mejorar la fiabilidad.
+                    setTimeout(() => {
+                        foundFeature.openPopup(center);
+                    }, 200); // Pequeño retraso de 200ms
 
                     // Configurar el listener para limpiar el marcador al hacer clic en el mapa
                     map.on('click', cleanUpTemporaryMarkers);
@@ -646,7 +650,7 @@
                     rolSearchMarker.on('popupclose', function() {
                         cleanUpTemporaryMarkers();
                     });
-                     // Configurar el listener para limpiar el marcador si se cierra el popup de la capa
+                    // Configurar el listener para limpiar el marcador si se cierra el popup de la capa
                     foundFeature.on('popupclose', function() {
                         cleanUpTemporaryMarkers();
                     });
