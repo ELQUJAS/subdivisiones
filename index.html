@@ -416,7 +416,8 @@
                 var centroid = layerFound.getBounds().getCenter(); // Obtiene el centroide de la subdivisión
                 var rolValue = layerFound.feature.properties['rol']; // Obtiene el valor del ROL
 
-                // CORRECCIÓN: Usar L.marker en lugar de L.circleMarker
+                // ******** ¡LA CORRECCIÓN CRÍTICA ESTÁ AQUÍ! ********
+                // Asegúrate de que esto diga L.marker y no L.circleMarker
                 rolSearchMarker = L.marker(centroid).addTo(map)
                     .bindPopup('<b>ROL:</b> ' + (rolValue !== null ? autolinker.link(String(rolValue).replace(/'/g, '\'').toLocaleString()) : 'No disponible'))
                     .openPopup();
