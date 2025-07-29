@@ -250,6 +250,36 @@
                 opacity: 0.9;
             }
 
+            /* Estilos para el contenedor de sugerencias del buscador de ROL */
+            #rolSugerencias {
+                width: 100%;
+                max-height: 150px; /* Limita la altura de la lista de sugerencias */
+                overflow-y: auto; /* Agrega scroll si hay muchas sugerencias */
+                border: 1px solid #ccc;
+                border-top: none;
+                background-color: white;
+                box-sizing: border-box;
+                position: absolute; /* Para que se superponga */
+                z-index: 1001; /* Asegura que esté por encima de otros elementos del control */
+                display: none; /* Oculto por defecto */
+            }
+
+            #rolSugerencias .sugerencia-item {
+                padding: 8px 12px;
+                cursor: pointer;
+                border-bottom: 1px solid #eee;
+                font-size: 0.9em;
+                color: #555;
+            }
+
+            #rolSugerencias .sugerencia-item:last-child {
+                border-bottom: none;
+            }
+
+            #rolSugerencias .sugerencia-item:hover {
+                background-color: #f0f0f0;
+            }
+
         </style>
         <title></title>
     </head>
@@ -443,6 +473,7 @@
                     }
                 });
                 map.off('click', cleanUpTemporaryMarkers); // Desactivar el listener click para limpiar
+                hideRolSuggestions(); // Ocultar sugerencias de ROL al limpiar
             }
 
             // --- Buscador de Coordenadas: Ahora se crea dinámicamente como un control personalizado ---
@@ -571,7 +602,7 @@
                         <input type="text" id="rolInput" placeholder="Buscar ROL (ej: 1234-5)">
                         <button id="buscarRol">Buscar ROL</button>
                         <div id="resultadoBusquedaRol"></div>
-                    `;
+                        <div id="rolSugerencias"></div> `;
 
                     L.DomEvent.disableClickPropagation(container);
                     L.DomEvent.disableScrollPropagation(container);
@@ -586,6 +617,8 @@
             const rolInput = rolSearchControlInstance.getContainer().querySelector('#rolInput');
             const buscarRolBoton = rolSearchControlInstance.getContainer().querySelector('#buscarRol');
             const resultadoRolDiv = rolSearchControlInstance.getContainer().querySelector('#resultadoBusquedaRol');
+            const rolSugerenciasDiv = rolSearchControlInstance.getContainer().querySelector('#rolSugerencias'); // Referencia al nuevo div de sugerencias
+
 
             // Posicionar el buscador de rol debajo del control de zoom
             setTimeout(function() {
@@ -609,11 +642,77 @@
                 popupAnchor: [0, -25] // Ajustar la posición del popup
             });
 
+            // Función para ocultar las sugerencias
+            function hideRolSuggestions() {
+                rolSugerenciasDiv.style.display = 'none';
+                rolSugerenciasDiv.innerHTML = '';
+            }
+
+            // Manejador de entrada para las sugerencias de ROL
+            rolInput.addEventListener('input', function() {
+                resultadoRolDiv.textContent = ''; // Limpiar mensaje de resultado al escribir
+                const searchTerm = rolInput.value.trim().toLowerCase();
+                
+                if (searchTerm.length < 1) { // Muestra sugerencias a partir de 1 carácter
+                    hideRolSuggestions();
+                    return;
+                }
+
+                const matchingRoles = new Set(); // Usar un Set para evitar duplicados
+                layer_Subdivisiones20232024_2.eachLayer(function(layer) {
+                    if (layer.feature && layer.feature.properties && layer.feature.properties['rol'] !== null) {
+                        const rol = String(layer.feature.properties['rol']).trim().toLowerCase();
+                        if (rol.includes(searchTerm)) {
+                            matchingRoles.add(rol);
+                        }
+                    }
+                });
+
+                // Convertir el Set a un Array y ordenar alfabéticamente
+                const sortedRoles = Array.from(matchingRoles).sort();
+
+                rolSugerenciasDiv.innerHTML = ''; // Limpiar sugerencias anteriores
+
+                if (sortedRoles.length > 0) {
+                    sortedRoles.slice(0, 10).forEach(rol => { // Mostrar un máximo de 10 sugerencias
+                        const suggestionItem = document.createElement('div');
+                        suggestionItem.classList.add('sugerencia-item');
+                        suggestionItem.textContent = rol;
+                        suggestionItem.addEventListener('click', function() {
+                            rolInput.value = rol; // Rellenar el input con la sugerencia
+                            hideRolSuggestions(); // Ocultar sugerencias
+                            buscarRolBoton.click(); // Disparar la búsqueda
+                        });
+                        rolSugerenciasDiv.appendChild(suggestionItem);
+                    });
+                    rolSugerenciasDiv.style.display = 'block'; // Mostrar el contenedor de sugerencias
+                } else {
+                    hideRolSuggestions();
+                }
+            });
+
+            // Ocultar sugerencias cuando se hace clic fuera del buscador de rol
+            map.on('click', function(e) {
+                if (!rolSearchControlInstance.getContainer().contains(e.originalEvent.target)) {
+                    hideRolSuggestions();
+                }
+            });
+            // También ocultar si se pierde el foco del input y no es el contenedor de sugerencias
+            rolInput.addEventListener('blur', function() {
+                setTimeout(() => { // Pequeño retraso para permitir clics en sugerencias
+                    if (!rolSugerenciasDiv.contains(document.activeElement)) {
+                        hideRolSuggestions();
+                    }
+                }, 100);
+            });
+
+
             buscarRolBoton.addEventListener('click', function() {
                 cleanUpTemporaryMarkers(); // Limpiar marcadores existentes
 
                 const rolValue = rolInput.value.trim();
                 resultadoRolDiv.textContent = '';
+                hideRolSuggestions(); // Ocultar sugerencias al buscar
 
                 if (!rolValue) {
                     resultadoRolDiv.textContent = 'Por favor, ingrese un ROL.';
@@ -635,7 +734,7 @@
 
                     // Añadir el marcador personalizado
                     rolSearchMarker = L.marker(center, {icon: rolIcon}).addTo(map);
-                    rolSearchMarker.bindPopup(`<b>ROL Encontrado:</b> ${rolValue}`).openPopup(); // Simplificado, el principal es el de la capa
+                    rolSearchMarker.bindPopup(`<b>ROL Encontrado:</b> ${rolValue}`).openPopup(); 
 
                     // Abrir el popup de la capa de subdivisiones
                     // Usamos setTimeout para asegurar que el mapa se ha reposicionado antes de abrir el popup,
@@ -658,10 +757,6 @@
                 } else {
                     resultadoRolDiv.textContent = `ROL "${rolValue}" no encontrado.`;
                 }
-            });
-
-            rolInput.addEventListener('input', function() {
-                resultadoRolDiv.textContent = ''; // Limpiar mensaje de resultado al escribir
             });
 
         </script>
