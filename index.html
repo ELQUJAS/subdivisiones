@@ -20,20 +20,20 @@
                 margin: 0;
             }
             /* Estilos minimalistas para el buscador de coordenadas */
-            .coordenadas-buscador {
+            /* Se ha ajustado el estilo para que se comporte como un control Leaflet */
+            .coordenadas-buscador.leaflet-control {
                 padding: 8px;
                 background-color: rgba(255, 255, 255, 0.9);
                 border-radius: 5px;
                 box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-                position: absolute; /* Importante para el posicionamiento manual */
                 z-index: 1000;
-                width: 220px;
+                width: 220px; /* Mantener ancho fijo */
                 font-family: Arial, sans-serif;
                 color: #333;
                 box-sizing: border-box;
                 display: flex;
                 align-items: center;
-                /* Eliminamos el margin-top aquí y lo manejamos con 'top' en el script para apilar */
+                /* Eliminamos el top/right/position aquí porque Leaflet.Control lo manejará */
             }
 
             .coordenadas-buscador span {
@@ -96,12 +96,13 @@
             }
 
             /* Estilos para el control de capas (leyenda) */
+            /* Mantenemos la leyenda en topright, su posición original con qgis2web */
             .leaflet-control-layers {
                 z-index: 1000;
-                position: absolute; /* Asegura el posicionamiento manual */
-                top: 10px; /* Posiciona en la parte superior derecha (valor por defecto de qgis2web) */
+                position: absolute;
+                top: 10px;
                 right: 10px;
-                left: unset; /* Deshacer cualquier estilo de left */
+                left: unset;
             }
             .leaflet-control-layers-base span {
                 display: none;
@@ -114,9 +115,10 @@
             }
 
             /* Ajuste para el control de búsqueda (roles) */
+            /* Mantenemos el buscador de roles a la izquierda de la leyenda/buscador de coordenadas */
             .leaflet-bar.leaflet-control.leaflet-control-search {
-                top: 10px; /* Posiciona el buscador de roles en la esquina superior derecha */
-                right: 250px; /* Ajusta este valor para que no choque con la leyenda */
+                top: 10px;
+                right: 250px; /* Ajusta este valor si la leyenda o el buscador de coordenadas son más anchos */
                 position: absolute;
                 left: unset;
             }
@@ -126,12 +128,6 @@
     </head>
     <body>
         <div id="map">
-        </div>
-
-        <div id="coordenadasBuscadorControl" class="coordenadas-buscador leaflet-control">
-            <input type="text" id="coordenadasInput" placeholder="Lat, Lon (ej: -39.28 -72.24)">
-            <button id="buscarCoordenadas">Buscar</button>
-            <div id="resultadoBusqueda"></div>
         </div>
 
         <script src="js/qgis2web_expressions.js"></script>
@@ -330,7 +326,7 @@
 
             var lay = L.control.layers.tree(null, overlaysTree, {
                 collapsed: false, // Leyenda fija
-                position: 'topright' // Vuelve a la esquina superior derecha
+                position: 'topright' // Mantenemos la leyenda en topright
             });
             lay.addTo(map);
 
@@ -358,31 +354,35 @@
                 }
             }
 
-            // --- Posicionamiento y manejo del buscador de coordenadas ---
-            // Obtenemos una referencia al div del buscador de coordenadas
-            const coordenadasBuscadorDiv = document.getElementById('coordenadasBuscadorControl');
+            // --- Buscador de Coordenadas: Ahora se crea dinámicamente como un control personalizado ---
+            var CoordsSearchControl = L.Control.extend({
+                onAdd: function(map) {
+                    var container = L.DomUtil.create('div', 'coordenadas-buscador leaflet-control');
+                    container.innerHTML = `
+                        <input type="text" id="coordenadasInput" placeholder="Lat, Lon (ej: -39.28 -72.24)">
+                        <button id="buscarCoordenadas">Buscar</button>
+                        <div id="resultadoBusqueda"></div>
+                    `;
 
-            // Calculamos la posición inicial. La leyenda está en 'topright'.
-            // Necesitamos el ancho y alto de la leyenda para posicionar el buscador debajo.
-            // Esto es un poco dinámico, por lo que una estimación inicial o un Listener podría ser útil.
-            // Para simplificar, le daremos un 'top' que asuma un tamaño promedio de la leyenda.
-            // Si la leyenda es muy grande o muy pequeña, esto podría necesitar ajuste.
-            function positionCoordenadasBuscador() {
-                const legendControl = document.querySelector('.leaflet-control-layers.leaflet-control-layers-expanded');
-                if (legendControl) {
-                    const legendHeight = legendControl.offsetHeight;
-                    coordenadasBuscadorDiv.style.top = (legendHeight + 20) + 'px'; // 20px de margen
-                    coordenadasBuscadorDiv.style.right = '10px'; // Misma derecha que la leyenda
-                } else {
-                     // Fallback si la leyenda no está visible o no se ha renderizado aún
-                     coordenadasBuscadorDiv.style.top = '150px'; // Valor de reserva
-                     coordenadasBuscadorDiv.style.right = '10px';
+                    // Evitar la propagación de eventos para que el mapa no se arrastre
+                    L.DomEvent.disableClickPropagation(container);
+                    L.DomEvent.disableScrollPropagation(container);
+
+                    return container;
+                },
+                onRemove: function(map) {
+                    // Limpieza opcional
                 }
-            }
+            });
 
-            // Llamar al posicionamiento inicial y cada vez que el mapa cambie de tamaño (si la leyenda es dinámica)
-            positionCoordenadasBuscador();
-            map.on('resize', positionCoordenadasBuscador); // Reajusta si el mapa cambia de tamaño
+            // Añadir el control de coordenadas DEPUES de la leyenda en la misma posición 'topright'
+            // para que Leaflet los apile automáticamente.
+            var coordsSearchControlInstance = new CoordsSearchControl({position: 'topright'}).addTo(map);
+
+            // Ahora podemos acceder a los elementos del DOM dentro del control
+            const coordenadasInput = coordsSearchControlInstance.getContainer().querySelector('#coordenadasInput');
+            const buscarBoton = coordsSearchControlInstance.getContainer().querySelector('#buscarCoordenadas');
+            const resultadoDiv = coordsSearchControlInstance.getContainer().querySelector('#resultadoBusqueda');
 
             // --- Configuración del control de búsqueda de roles ---
             var searchControl = new L.Control.Search({
@@ -391,7 +391,8 @@
                 hideMarkerOnCollapse: true,
                 propertyName: 'rol',
                 marker: {
-                    // Podemos dejar este vacío, ya que el 'search:locationfound' manejará el marcador
+                    // El marcador de búsqueda no necesita un icono específico aquí,
+                    // lo manejamos en search:locationfound
                 }
             });
             map.addControl(searchControl);
@@ -402,13 +403,10 @@
 
                 var latlng = e.latlng;
                 var feature = e.layer.feature; // Obtiene la característica completa
-                var layer = e.layer; // Obtiene la capa GeoJSON encontrada
 
                 rolSearchMarker = L.marker(latlng).addTo(map);
 
-                // Obtener el contenido del popup de la capa original y pasarlo al marcador temporal
-                // pop_Subdivisiones20232024_2 vincula el popup, necesitamos su contenido para el marcador.
-                // Una forma es generar el contenido directamente para el marcador.
+                // Generar el contenido del popup directamente para el marcador temporal
                 var popupContent = '<table>\
                             <tr>\
                                 <th scope="row">ROL : </th>\
@@ -481,11 +479,16 @@
 
             map.on('search:collapsed', function(e) { });
 
-            if (typeof url === 'undefined') {
-                document.getElementsByClassName('search-button')[0].className += ' fa fa-binoculars';
-            } else {
-                document.getElementsByClassName('search-button')[1].className += ' fa fa-binoculars';
-            }
+            // qgis2web assigns search button icons. Ensure they are correctly assigned.
+            // This part might need to be adjusted based on the specific version of qgis2web
+            // or if other search controls are present.
+            // Simplified check based on typical qgis2web output structure.
+            document.querySelectorAll('.leaflet-control-search .search-button').forEach(button => {
+                if (!button.classList.contains('fa-binoculars')) {
+                    button.classList.add('fa', 'fa-binoculars');
+                }
+            });
+
             resetLabels([layer_Subdivisiones20232024_2]);
             map.on("zoomend", function(){
                 resetLabels([layer_Subdivisiones20232024_2]);
@@ -498,48 +501,44 @@
             });
 
             // JavaScript para la funcionalidad del buscador de coordenadas
-            document.addEventListener('DOMContentLoaded', function() {
-                const coordenadasInput = document.getElementById('coordenadasInput');
-                const buscarBoton = document.getElementById('buscarCoordenadas');
-                const resultadoDiv = document.getElementById('resultadoBusqueda');
+            // Ahora se adjuntan a los elementos del DOM después de que el control se ha añadido al mapa
+            // (cuando coordsSearchControlInstance.getContainer() esté disponible).
+            buscarBoton.addEventListener('click', function() {
+                cleanUpTemporaryMarkers();
 
-                buscarBoton.addEventListener('click', function() {
+                const inputValue = coordenadasInput.value.trim();
+                const parts = inputValue.split(/\s+/);
+
+                resultadoDiv.textContent = '';
+
+                if (parts.length !== 2) {
+                    resultadoDiv.textContent = 'Formato: Lat, Lon';
+                    return;
+                }
+
+                const lat = parseFloat(parts[0]);
+                const lng = parseFloat(parts[1]);
+
+                if (isNaN(lat) || isNaN(lng)) {
+                    resultadoDiv.textContent = 'Coordenadas inválidas.';
+                    return;
+                }
+
+                map.setView([lat, lng], 15);
+
+                coordSearchMarker = L.marker([lat, lng]).addTo(map);
+                const formattedLat = lat.toFixed(4);
+                const formattedLng = lng.toFixed(4);
+                coordSearchMarker.bindPopup(`<b>Coordenadas:</b><br>${formattedLat}, ${formattedLng}`).openPopup();
+
+                map.on('click', cleanUpTemporaryMarkers);
+                coordSearchMarker.on('popupclose', function() {
                     cleanUpTemporaryMarkers();
-
-                    const inputValue = coordenadasInput.value.trim();
-                    const parts = inputValue.split(/\s+/);
-
-                    resultadoDiv.textContent = '';
-
-                    if (parts.length !== 2) {
-                        resultadoDiv.textContent = 'Formato: Lat, Lon';
-                        return;
-                    }
-
-                    const lat = parseFloat(parts[0]);
-                    const lng = parseFloat(parts[1]);
-
-                    if (isNaN(lat) || isNaN(lng)) {
-                        resultadoDiv.textContent = 'Coordenadas inválidas.';
-                        return;
-                    }
-
-                    map.setView([lat, lng], 15);
-
-                    coordSearchMarker = L.marker([lat, lng]).addTo(map);
-                    const formattedLat = lat.toFixed(4);
-                    const formattedLng = lng.toFixed(4);
-                    coordSearchMarker.bindPopup(`<b>Coordenadas:</b><br>${formattedLat}, ${formattedLng}`).openPopup();
-
-                    map.on('click', cleanUpTemporaryMarkers);
-                    coordSearchMarker.on('popupclose', function() {
-                        cleanUpTemporaryMarkers();
-                    });
                 });
+            });
 
-                coordenadasInput.addEventListener('input', function() {
-                    resultadoDiv.textContent = '';
-                });
+            coordenadasInput.addEventListener('input', function() {
+                resultadoDiv.textContent = '';
             });
         </script>
     </body>
