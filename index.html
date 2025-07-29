@@ -5,7 +5,7 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
         <meta name="mobile-web-app-capable" content="yes">
-        <meta name="apple-mobile-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
         <link rel="stylesheet" href="css/leaflet.css">
         <link rel="stylesheet" href="css/L.Control.Layers.Tree.css">
         <link rel="stylesheet" href="css/qgis2web.css">
@@ -21,34 +21,33 @@
             }
             /* Estilos minimalistas para el buscador de coordenadas */
             .coordenadas-buscador {
-                padding: 8px; /* Padding reducido */
-                background-color: rgba(255, 255, 255, 0.9); /* Fondo ligeramente transparente */
-                border-radius: 5px; /* Bordes más sutiles */
-                box-shadow: 0 2px 8px rgba(0,0,0,0.15); /* Sombra más suave */
-                /* Posicionamiento relativo para que se ajuste bajo el control de capas */
-                position: relative;
+                padding: 8px;
+                background-color: rgba(255, 255, 255, 0.9);
+                border-radius: 5px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+                position: absolute; /* Importante para el posicionamiento manual */
                 z-index: 1000;
-                width: 220px; /* Ancho más pequeño */
+                width: 220px;
                 font-family: Arial, sans-serif;
                 color: #333;
                 box-sizing: border-box;
-                display: flex; /* Para organizar input y botón en línea */
-                align-items: center; /* Alinear verticalmente */
-                margin-top: 10px; /* Margen superior para separarlo de la leyenda */
+                display: flex;
+                align-items: center;
+                /* Eliminamos el margin-top aquí y lo manejamos con 'top' en el script para apilar */
             }
 
             .coordenadas-buscador span {
-                display: none; /* Ocultar el título "Buscar por Coordenadas" */
+                display: none;
             }
 
             .coordenadas-buscador input {
-                flex-grow: 1; /* El input tomará el espacio restante */
-                padding: 6px 10px; /* Padding más pequeño */
+                flex-grow: 1;
+                padding: 6px 10px;
                 margin-right: 5px;
-                border: 1px solid #ccc; /* Borde más claro */
+                border: 1px solid #ccc;
                 border-radius: 3px;
                 box-sizing: border-box;
-                font-size: 0.85em; /* Fuente más pequeña */
+                font-size: 0.85em;
                 color: #333;
                 transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
             }
@@ -59,20 +58,20 @@
             }
 
             .coordenadas-buscador input:focus {
-                border-color: #007bff; /* Azul al enfocar */
+                border-color: #007bff;
                 box-shadow: 0 0 4px rgba(0, 123, 255, 0.4);
                 outline: none;
             }
 
             .coordenadas-buscador button {
-                padding: 6px 10px; /* Padding más pequeño */
+                padding: 6px 10px;
                 background-color: #007bff;
                 color: white;
                 border: none;
                 border-radius: 3px;
                 cursor: pointer;
-                font-size: 0.85em; /* Fuente más pequeña */
-                font-weight: normal; /* Texto más ligero */
+                font-size: 0.85em;
+                font-weight: normal;
                 transition: background-color 0.2s ease-in-out;
             }
 
@@ -85,42 +84,41 @@
             }
 
             #resultadoBusqueda {
-                font-size: 0.75em; /* Texto de resultado aún más pequeño */
-                margin-top: 5px; /* Espacio reducido */
+                font-size: 0.75em;
+                margin-top: 5px;
                 color: #dc3545;
                 font-weight: normal;
-                position: absolute; /* Para que no afecte el layout del input/boton */
-                width: calc(100% - 16px); /* Ancho del padding */
-                bottom: -20px; /* Colocar debajo del input/boton */
-                left: 8px; /* Alinear con el padding izquierdo */
-                text-align: center; /* Centrar texto */
+                position: absolute;
+                width: calc(100% - 16px);
+                bottom: -20px;
+                left: 8px;
+                text-align: center;
             }
 
             /* Estilos para el control de capas (leyenda) */
             .leaflet-control-layers {
                 z-index: 1000;
-                position: absolute;
-                top: 10px; /* Posiciona en la parte superior izquierda */
-                left: 10px;
+                position: absolute; /* Asegura el posicionamiento manual */
+                top: 10px; /* Posiciona en la parte superior derecha (valor por defecto de qgis2web) */
+                right: 10px;
+                left: unset; /* Deshacer cualquier estilo de left */
             }
-            /* Oculta la base de "Buscar por Coordenadas" del control de capas, ya que ahora es un div separado */
             .leaflet-control-layers-base span {
                 display: none;
             }
             .leaflet-control-layers-expanded .leaflet-control-layers-list {
-                display: block; /* Asegura que la lista siempre esté visible si la leyenda no está colapsada */
+                display: block;
             }
             .leaflet-control-layers-tree .leaflet-control-layers-separator {
-                display: none; /* Oculta el separador si no quieres ver la línea entre base y overlays */
+                display: none;
             }
 
             /* Ajuste para el control de búsqueda (roles) */
             .leaflet-bar.leaflet-control.leaflet-control-search {
-                /* Posiciona el buscador de roles en la esquina superior derecha */
-                top: 10px;
-                right: 10px;
+                top: 10px; /* Posiciona el buscador de roles en la esquina superior derecha */
+                right: 250px; /* Ajusta este valor para que no choque con la leyenda */
                 position: absolute;
-                left: unset; /* Deshacer cualquier estilo de left si lo hubiera */
+                left: unset;
             }
 
         </style>
@@ -130,12 +128,10 @@
         <div id="map">
         </div>
 
-        <div id="coordSearchContainer" class="leaflet-control">
-            <div class="coordenadas-buscador">
-                <input type="text" id="coordenadasInput" placeholder="Lat, Lon (ej: -39.28 -72.24)">
-                <button id="buscarCoordenadas">Buscar</button>
-                <div id="resultadoBusqueda"></div>
-            </div>
+        <div id="coordenadasBuscadorControl" class="coordenadas-buscador leaflet-control">
+            <input type="text" id="coordenadasInput" placeholder="Lat, Lon (ej: -39.28 -72.24)">
+            <button id="buscarCoordenadas">Buscar</button>
+            <div id="resultadoBusqueda"></div>
         </div>
 
         <script src="js/qgis2web_expressions.js"></script>
@@ -313,33 +309,32 @@
                 style: style_Subdivisiones20232024_2_0,
             });
             bounds_group.addLayer(layer_Subdivisiones20232024_2);
-            map.addLayer(layer_Subdivisiones20232024_2); // Asegúrate de que esta capa esté añadida al mapa
+            map.addLayer(layer_Subdivisiones20232024_2);
 
             // --- Configuración del control de capas (leyenda) ---
             var overlaysTree = [
                 {
-                    label: '<b>Capas de Información</b>', // Un grupo para tus capas de datos
+                    label: '<b>Capas de Información</b>',
                     children: [
                         {label: '<img src="legend/Subdivisiones20232024_2.png" /> Subdivisiones 2023-2024', layer: layer_Subdivisiones20232024_2},
-                        // Puedes añadir más capas de información aquí
                     ]
                 },
                 {
-                    label: '<b>Mapas Base</b>', // Un grupo para los mapas base
+                    label: '<b>Mapas Base</b>',
                     children: [
                         {label: "OpenStreetMap", layer: layer_OpenStreetMap_0, radioGroup: "baseLayers"},
-                        {label: "Google Satellite", layer: layer_GoogleSatellite_1, radioGroup: "baseLayers", checked: true}, // Marcado por defecto
+                        {label: "Google Satellite", layer: layer_GoogleSatellite_1, radioGroup: "baseLayers", checked: true},
                     ]
                 }
             ];
 
             var lay = L.control.layers.tree(null, overlaysTree, {
                 collapsed: false, // Leyenda fija
-                position: 'topleft'
+                position: 'topright' // Vuelve a la esquina superior derecha
             });
             lay.addTo(map);
 
-            // Asegúrate de añadir el mapa base por defecto al mapa (el que tiene 'checked: true')
+            // Asegúrate de añadir el mapa base por defecto al mapa
             map.addLayer(layer_GoogleSatellite_1);
 
             setBounds();
@@ -358,91 +353,134 @@
                     map.removeLayer(rolSearchMarker);
                     rolSearchMarker = null;
                 }
-                // Desactivar el listener de clic en el mapa si no hay marcadores temporales
                 if (!coordSearchMarker && !rolSearchMarker) {
                     map.off('click', cleanUpTemporaryMarkers);
                 }
             }
 
-            // --- Añadir el buscador de coordenadas como un control de Leaflet ---
-            // Esto permite que Leaflet gestione su posicionamiento automático debajo de otros controles.
-            var coordSearchControl = L.Control.extend({
-                onAdd: function(map) {
-                    var container = L.DomUtil.get('coordSearchContainer');
-                    // Evitar la propagación de eventos para que el mapa no se arrastre
-                    L.DomEvent.disableClickPropagation(container);
-                    L.DomEvent.disableScrollPropagation(container);
-                    return container;
-                },
-                onRemove: function(map) {
-                    // Limpieza opcional si el control se removiera dinámicamente
+            // --- Posicionamiento y manejo del buscador de coordenadas ---
+            // Obtenemos una referencia al div del buscador de coordenadas
+            const coordenadasBuscadorDiv = document.getElementById('coordenadasBuscadorControl');
+
+            // Calculamos la posición inicial. La leyenda está en 'topright'.
+            // Necesitamos el ancho y alto de la leyenda para posicionar el buscador debajo.
+            // Esto es un poco dinámico, por lo que una estimación inicial o un Listener podría ser útil.
+            // Para simplificar, le daremos un 'top' que asuma un tamaño promedio de la leyenda.
+            // Si la leyenda es muy grande o muy pequeña, esto podría necesitar ajuste.
+            function positionCoordenadasBuscador() {
+                const legendControl = document.querySelector('.leaflet-control-layers.leaflet-control-layers-expanded');
+                if (legendControl) {
+                    const legendHeight = legendControl.offsetHeight;
+                    coordenadasBuscadorDiv.style.top = (legendHeight + 20) + 'px'; // 20px de margen
+                    coordenadasBuscadorDiv.style.right = '10px'; // Misma derecha que la leyenda
+                } else {
+                     // Fallback si la leyenda no está visible o no se ha renderizado aún
+                     coordenadasBuscadorDiv.style.top = '150px'; // Valor de reserva
+                     coordenadasBuscadorDiv.style.right = '10px';
                 }
-            });
-            new coordSearchControl({position: 'topleft'}).addTo(map);
+            }
 
+            // Llamar al posicionamiento inicial y cada vez que el mapa cambie de tamaño (si la leyenda es dinámica)
+            positionCoordenadasBuscador();
+            map.on('resize', positionCoordenadasBuscador); // Reajusta si el mapa cambia de tamaño
 
-            // Configuración del control de búsqueda de roles
+            // --- Configuración del control de búsqueda de roles ---
             var searchControl = new L.Control.Search({
                 layer: layer_Subdivisiones20232024_2,
                 initial: false,
                 hideMarkerOnCollapse: true,
                 propertyName: 'rol',
-                marker: { // Personaliza el marcador de búsqueda de rol
-                    icon: new L.Icon.Default(), // Puedes usar un icono personalizado aquí
-                    // Por defecto, Leaflet.Search crea un marcador y un popup.
-                    // Para que se despliegue el POPUP completo, lo haremos en el search:locationfound
+                marker: {
+                    // Podemos dejar este vacío, ya que el 'search:locationfound' manejará el marcador
                 }
             });
             map.addControl(searchControl);
 
             // Listener para cuando se encuentra una ubicación por Rol
             map.on('search:locationfound', function(e) {
-                cleanUpTemporaryMarkers(); // Limpia cualquier marcador existente antes de añadir el nuevo
+                cleanUpTemporaryMarkers();
 
                 var latlng = e.latlng;
-                var feature = e.layer.feature; // Obtén la característica completa
-                var layer = e.layer; // Obtén la capa GeoJSON encontrada
+                var feature = e.layer.feature; // Obtiene la característica completa
+                var layer = e.layer; // Obtiene la capa GeoJSON encontrada
 
-                // Crea un nuevo marcador en las coordenadas del rol
                 rolSearchMarker = L.marker(latlng).addTo(map);
 
-                // Reutiliza la función pop_Subdivisiones20232024_2 para obtener el contenido del popup
-                // y vincularlo al nuevo marcador temporal.
-                // Es importante que la capa original 'layer' tenga el popup contenido.
-                // Si 'pop_Subdivisiones20232024_2' solo vincula el popup, necesitamos recrear el contenido.
-                // O mejor, si el 'feature' es el mismo, podemos usar el popup de la capa 'e.layer'.
+                // Obtener el contenido del popup de la capa original y pasarlo al marcador temporal
+                // pop_Subdivisiones20232024_2 vincula el popup, necesitamos su contenido para el marcador.
+                // Una forma es generar el contenido directamente para el marcador.
+                var popupContent = '<table>\
+                            <tr>\
+                                <th scope="row">ROL : </th>\
+                                <td>' + (feature.properties['rol'] !== null ? autolinker.link(String(feature.properties['rol']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                            </tr>\
+                            <tr>\
+                                <th scope="row">ZONA PRI : </th>\
+                                <td>' + (feature.properties['ZONA PRI'] !== null ? autolinker.link(String(feature.properties['ZONA PRI']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                            </tr>\
+                            <tr>\
+                                <th scope="row">ZONA/SECTOR : </th>\
+                                <td>' + (feature.properties['ZONA'] !== null ? autolinker.link(String(feature.properties['ZONA']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                            </tr>\
+                            <tr>\
+                                <th scope="row">ZOIT : </th>\
+                                <td>' + (feature.properties['ZOIT'] !== null ? autolinker.link(String(feature.properties['ZOIT']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                            </tr>\
+                            <tr>\
+                                <th scope="row">ESTADO LAGO : </th>\
+                                <td>' + (feature.properties['ESTADO LAG'] !== null ? autolinker.link(String(feature.properties['ESTADO LAG']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                            </tr>\
+                            <tr>\
+                                <th scope="row">COMUNIDAD INDÍGENA : </th>\
+                                <td>' + (feature.properties['COMUNIDAD'] !== null ? autolinker.link(String(feature.properties['COMUNIDAD']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                            </tr>\
+                            <tr>\
+                                <th scope="row">CONSTRUCCIONES : </th>\
+                                <td>' + (feature.properties['CONSTRUC.'] !== null ? autolinker.link(String(feature.properties['CONSTRUC.']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                            </tr>\
+                            <tr>\
+                                <th scope="row">APROBACIÓN : </th>\
+                                <td>' + (feature.properties['APROBACIÓ'] !== null ? autolinker.link(String(feature.properties['APROBACIÓ']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                            </tr>\
+                            <tr>\
+                                <th scope="row">FECHA : </th>\
+                                <td>' + (feature.properties['FECHA'] !== null ? autolinker.link(String(feature.properties['FECHA']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                            </tr>\
+                            <tr>\
+                                <th scope="row">UBICACIÓN : </th>\
+                                <td>' + (feature.properties['UBICACIÓN'] !== null ? autolinker.link(String(feature.properties['UBICACIÓN']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                            </tr>\
+                            <tr>\
+                                <th scope="row">PROPIETARIO : </th>\
+                                <td>' + (feature.properties['PROPIETARI'] !== null ? autolinker.link(String(feature.properties['PROPIETARI']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                            </tr>\
+                            <tr>\
+                                <th scope="row">SUPERFICIE (MT2) : </th>\
+                                <td>' + (feature.properties['SUPERFICIE'] !== null ? autolinker.link(String(feature.properties['SUPERFICIE']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                            </tr>\
+                            <tr>\
+                                <th scope="row">DESTINO : </th>\
+                                <td>' + (feature.properties['DESTINO'] !== null ? autolinker.link(String(feature.properties['DESTINO']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                            </tr>\
+                            <tr>\
+                                <th scope="row">RECEPCIÓN : </th>\
+                                <td>' + (feature.properties['RECEPCIÓN'] !== null ? autolinker.link(String(feature.properties['RECEPCIÓN']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                            </tr>\
+                        </table>';
+                var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+                rolSearchMarker.bindPopup(content, { maxHeight: 400 });
+                rolSearchMarker.openPopup();
 
-                // Opción 1: Si quieres copiar el contenido exacto del popup de la capa original
-                if (layer._popup && layer._popup._content) {
-                    rolSearchMarker.bindPopup(layer._popup._content).openPopup();
-                } else {
-                    // Si la capa original no tenía el popup abierto o no se generó el contenido aún
-                    // genera el contenido del popup usando pop_Subdivisiones20232024_2 lógicamente
-                    // O si pop_Subdivisiones20232024_2 solo 'bindeaba' el popup, podemos llamarlo directamente
-                    // para el marcador temporal. Necesitamos una forma de obtener el popup content.
-                    // La función pop_Subdivisiones20232024_2 ya vincula el popup. Simplemente lo abrimos.
-                    pop_Subdivisiones20232024_2(feature, rolSearchMarker); // Pasa el marcador como si fuera la capa
-                    rolSearchMarker.openPopup();
-                }
+                map.setView(latlng, 17);
 
-                map.setView(latlng, 17); // Centrar y hacer zoom en la ubicación del rol
-
-                // Activar el listener para limpiar el marcador al hacer clic en el mapa
                 map.on('click', cleanUpTemporaryMarkers);
-
-                // Asegurarse de que el marcador desaparezca si se cierra su popup manualmente
                 rolSearchMarker.on('popupclose', function() {
                     cleanUpTemporaryMarkers();
                 });
             });
 
-            // Listener para cuando la búsqueda de rol no encuentra nada
-            map.on('search:collapsed', function(e) {
-                // Leaflet's search control will handle its own marker hiding if hideMarkerOnCollapse is true.
-                // Our `cleanUpTemporaryMarkers` ensures our custom markers are removed.
-            });
+            map.on('search:collapsed', function(e) { });
 
-            // Asigna los iconos de binoculares a los botones de búsqueda (esto es parte de qgis2web)
             if (typeof url === 'undefined') {
                 document.getElementsByClassName('search-button')[0].className += ' fa fa-binoculars';
             } else {
@@ -466,12 +504,11 @@
                 const resultadoDiv = document.getElementById('resultadoBusqueda');
 
                 buscarBoton.addEventListener('click', function() {
-                    cleanUpTemporaryMarkers(); // Limpia cualquier marcador existente antes de una nueva búsqueda de coordenadas.
+                    cleanUpTemporaryMarkers();
 
                     const inputValue = coordenadasInput.value.trim();
                     const parts = inputValue.split(/\s+/);
 
-                    // Limpiar el mensaje de resultado anterior
                     resultadoDiv.textContent = '';
 
                     if (parts.length !== 2) {
@@ -487,24 +524,19 @@
                         return;
                     }
 
-                    map.setView([lat, lng], 15); // Centra y hace zoom
+                    map.setView([lat, lng], 15);
 
                     coordSearchMarker = L.marker([lat, lng]).addTo(map);
-                    // Formatea las coordenadas para que sean más legibles en el popup
-                    const formattedLat = lat.toFixed(4); // Limita a 4 decimales
-                    const formattedLng = lng.toFixed(4); // Limita a 4 decimales
+                    const formattedLat = lat.toFixed(4);
+                    const formattedLng = lng.toFixed(4);
                     coordSearchMarker.bindPopup(`<b>Coordenadas:</b><br>${formattedLat}, ${formattedLng}`).openPopup();
 
-                    // Activar el listener para limpiar el marcador al hacer clic en el mapa
                     map.on('click', cleanUpTemporaryMarkers);
-
-                    // Asegurarse de que el marcador desaparezca si se cierra su popup manualmente
                     coordSearchMarker.on('popupclose', function() {
                         cleanUpTemporaryMarkers();
                     });
                 });
 
-                // Listener para el campo de entrada (opcional, para borrar el mensaje de error al escribir)
                 coordenadasInput.addEventListener('input', function() {
                     resultadoDiv.textContent = '';
                 });
