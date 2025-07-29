@@ -32,6 +32,11 @@
                 display: flex;
                 flex-direction: column;
                 align-items: flex-start;
+                /* Nueva posición para el buscador de coordenadas */
+                position: absolute;
+                top: 250px; /* Ajusta este valor para moverlo más abajo */
+                right: 10px;
+                left: unset;
             }
 
             .coordenadas-buscador span {
@@ -166,7 +171,7 @@
                 z-index: 1000;
             }
             
-            /* --- NUEVOS ESTILOS PARA EL BUSCADOR DE ROLES PERSONALIZADO --- */
+            /* --- ESTILOS PARA EL BUSCADOR DE ROLES PERSONALIZADO --- */
             .rol-buscador.leaflet-control {
                 padding: 10px;
                 background-color: rgba(255, 255, 255, 0.9);
@@ -180,9 +185,9 @@
                 display: flex;
                 flex-direction: column;
                 align-items: flex-start;
-                /* Posición por defecto, ajustado por JS */
+                /* Posición bajo los controles de zoom */
                 position: absolute; /* Importante para que top/left/right/bottom funcionen */
-                top: 80px; /* Ejemplo: 10px + 2*30px (zoom buttons) + padding/margin */
+                top: 80px; /* Ajustado para estar debajo de los botones de zoom */
                 left: 10px;
                 right: unset;
             }
@@ -256,7 +261,7 @@
             .rol-search-marker-icon i {
                 text-shadow: 1px 1px 2px rgba(0,0,0,0.5); /* Agrega sombra para que resalte */
                 font-size: 2.5em; /* Icono un poco más grande */
-                color: #ffc107; /* Color amarillo/naranja para el marcador */
+                color: #007bff; /* ¡Color azul para el marcador! */
             }
 
         </style>
@@ -443,24 +448,26 @@
                     map.removeLayer(coordSearchMarker);
                     coordSearchMarker = null;
                 }
-                if (rolSearchMarker) {
-                    map.removeLayer(rolSearchMarker);
-                    rolSearchMarker = null;
-                }
+                // *** Cambio: rolSearchMarker solo se limpia al hacer click en ÉL ***
+                // if (rolSearchMarker) {
+                //     map.removeLayer(rolSearchMarker);
+                //     rolSearchMarker = null;
+                // }
+
                 // Limpiar mensajes de resultado
                 document.getElementById('resultadoRolBusqueda').textContent = '';
                 document.getElementById('resultadoRolBusqueda').className = ''; // Limpiar clase de éxito/error
                 document.getElementById('resultadoBusqueda').textContent = '';
 
                 // Si la capa de subdivisiones tenía un popup abierto por una búsqueda previa, ciérralo.
-                // Usamos lastFoundLayer para cerrar el popup del polígono específico si existe
                 if (lastFoundLayer && lastFoundLayer.isPopupOpen()) {
                      lastFoundLayer.closePopup();
                 }
                 lastFoundLayer = null; // Resetear la referencia
-
-                // Desactivar el listener click para limpiar, para evitar múltiples activaciones
-                map.off('click', cleanUpTemporaryMarkers);
+                
+                // *** Cambio: Desactivar el listener click de mapa para limpiar marcadores ***
+                // Ya no necesitamos esto si el marcador de ROL solo se limpia al hacer click en sí mismo.
+                // map.off('click', cleanUpTemporaryMarkers);
             }
 
             // --- Buscador de Coordenadas ---
@@ -482,13 +489,14 @@
             });
 
             // Añadir el control de coordenadas
+            // Ya no es necesario ajustar la posición con JS si la fijamos en CSS
             var coordsSearchControlInstance = new CoordsSearchControl({position: 'topright'}).addTo(map);
 
             const coordenadasInput = coordsSearchControlInstance.getContainer().querySelector('#coordenadasInput');
             const buscarBoton = coordsSearchControlInstance.getContainer().querySelector('#buscarCoordenadas');
             const resultadoDiv = coordsSearchControlInstance.getContainer().querySelector('#resultadoBusqueda');
 
-            // --- NUEVO BUSCADOR DE ROLES PERSONALIZADO ---
+            // --- BUSCADOR DE ROLES PERSONALIZADO ---
             var RolSearchControl = L.Control.extend({
                 onAdd: function(map) {
                     var container = L.DomUtil.create('div', 'rol-buscador leaflet-control');
@@ -501,7 +509,7 @@
                     // Previene que los clics dentro del control cierren el marcador
                     L.DomEvent.disableClickPropagation(container);
                     L.DomEvent.disableScrollPropagation(container);
-                    // Previene que Enter en el input envíe el formulario si fuera parte de uno
+                    // Permite usar Enter para buscar
                     L.DomEvent.on(container, 'keydown', function (e) {
                         if (e.keyCode === 13) { // 13 es la tecla Enter
                             L.DomEvent.preventDefault(e); // Previene la acción por defecto
@@ -514,6 +522,7 @@
                 onRemove: function(map) { }
             });
 
+            // Añadir el control de roles en la esquina superior izquierda
             var rolSearchControlInstance = new RolSearchControl({position: 'topleft'}).addTo(map);
 
             const rolInput = rolSearchControlInstance.getContainer().querySelector('#rolInput');
@@ -522,7 +531,28 @@
 
 
             buscarRolBoton.addEventListener('click', function() {
-                cleanUpTemporaryMarkers(); // Limpia cualquier marcador o mensaje anterior
+                // Primero limpia solo el marcador de coordenadas, si existe.
+                // El marcador de ROL se limpiará solo al hacer click en él.
+                if (coordSearchMarker) {
+                    map.removeLayer(coordSearchMarker);
+                    coordSearchMarker = null;
+                }
+                // También cerramos el popup del polígono y reseteamos lastFoundLayer
+                if (lastFoundLayer && lastFoundLayer.isPopupOpen()) {
+                     lastFoundLayer.closePopup();
+                }
+                lastFoundLayer = null; 
+
+                // Y limpiamos cualquier marcador de ROL previo si no fue clickeado
+                if (rolSearchMarker) {
+                    map.removeLayer(rolSearchMarker);
+                    rolSearchMarker = null;
+                }
+
+                // Limpiar mensajes de resultado de ambos buscadores
+                document.getElementById('resultadoRolBusqueda').textContent = '';
+                document.getElementById('resultadoRolBusqueda').className = ''; 
+                document.getElementById('resultadoBusqueda').textContent = '';
 
                 const searchRolValue = rolInput.value.trim().toUpperCase(); // Convertir a mayúsculas para coincidencia
 
@@ -537,7 +567,6 @@
                 // Itera sobre las capas de subdivisión para encontrar el ROL
                 layer_Subdivisiones20232024_2.eachLayer(function(layer) {
                     if (layer.feature && layer.feature.properties && layer.feature.properties['rol']) {
-                        // Asegura que el valor del ROL en la capa también sea tratado como cadena y mayúsculas
                         const layerRol = String(layer.feature.properties['rol']).toUpperCase();
                         if (layerRol === searchRolValue) {
                             foundLayer = layer;
@@ -551,10 +580,10 @@
                     const centroid = foundLayer.getBounds().getCenter();
                     const rolValue = foundLayer.feature.properties['rol'];
 
-                    // Crea un icono personalizado con Font Awesome
+                    // Crea un icono personalizado con Font Awesome (AZUL)
                     var customRolSearchIcon = L.divIcon({
                         className: 'rol-search-marker-icon', // Clase CSS para el contenedor del icono
-                        html: '<i class="fas fa-map-marker-alt" style="color: #ffc107;"></i>', // Icono de pin amarillo/naranja
+                        html: '<i class="fas fa-map-marker-alt" style="color: #007bff;"></i>', // Icono de pin AZUL
                         iconSize: [35, 45], // Tamaño del contenedor del icono [width, height]
                         iconAnchor: [17, 45] // Punto de anclaje (la punta del pin)
                     });
@@ -570,19 +599,32 @@
                     resultadoRolDiv.textContent = `ROL "${searchRolValue}" encontrado.`;
                     resultadoRolDiv.className = 'success'; // Clase para estilo de éxito
 
-                    // Añadir un listener al mapa para limpiar los marcadores al hacer click fuera
-                    // Este listener se activa DESPUÉS de que se ha encontrado el rol
-                    map.on('click', cleanUpTemporaryMarkers);
-                    
-                    // También limpia si se cierra el popup del marcador o del polígono
-                    rolSearchMarker.on('popupclose', cleanUpTemporaryMarkers);
-                    foundLayer.on('popupclose', cleanUpTemporaryMarkers);
+                    // *** Cambio: Listener para que el marcador de ROL desaparezca SOLO al hacer clic en él ***
+                    rolSearchMarker.on('click', function() {
+                        cleanUpTemporaryMarkers(); // Limpia solo el marcador de ROL y su popup
+                        // Importante: No cerramos el popup del polígono aquí si el usuario solo hizo clic en el marcador.
+                        // El popup del polígono tiene su propio listener para cerrarse si se hace click fuera o se cierra manualmente.
+                        // Si quieres que el popup del polígono también se cierre al hacer clic en el marcador, puedes añadirlo aquí:
+                        // if (lastFoundLayer) lastFoundLayer.closePopup();
+                    });
+
+                    // Asegurarse de que el popup del polígono se cierre si se hace clic fuera del mismo
+                    foundLayer.on('popupclose', function() {
+                        // Si el popup del polígono se cierra, pero el marcador de rol sigue ahí, también lo limpiamos
+                        if (rolSearchMarker) {
+                            map.removeLayer(rolSearchMarker);
+                            rolSearchMarker = null;
+                        }
+                        resultadoRolDiv.textContent = '';
+                        resultadoRolDiv.className = '';
+                        lastFoundLayer = null;
+                    });
+
 
                 } else {
                     resultadoRolDiv.textContent = `ROL "${searchRolValue}" no encontrado.`;
                     resultadoRolDiv.className = 'error'; // Clase para estilo de error
-                    // En caso de no encontrarlo, también limpiamos por si hubiera algo previo
-                    cleanUpTemporaryMarkers(); 
+                    cleanUpTemporaryMarkers(); // Limpia cualquier marcador de coordenadas si no hay rol
                 }
             });
 
