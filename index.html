@@ -253,7 +253,6 @@
                 var popupContent = '<h4>ROL: ' + (feature.properties['rol'] !== null ? autolinker.link(String(feature.properties['rol']).replace(/'/g, '\'').toLocaleString()) : 'No disponible') + '</h4>';
                 
                 function createDetails(summaryText, contentValue) {
-                    // Ahora siempre genera el detalle, y usa "Sin información" si el valor es nulo o vacío
                     var displayValue = (contentValue === null || contentValue === '') ? 'Sin información' : autolinker.link(String(contentValue).replace(/'/g, '\'').toLocaleString());
                     return '<details><summary>' + summaryText + '</summary><p>' + displayValue + '</p></details>';
                 }
@@ -314,7 +313,7 @@
                 {
                     label: '<b>Capas de Información</b>',
                     children: [
-                        {label: '<img src="legend/Subdivisiones20232024_2.png" /> Subdivisiones 2023-2023', layer: layer_Subdivisiones20232024_2},
+                        {label: '<img src="legend/Subdivisiones20232024_2.png" /> Subdivisiones 2023-2024', layer: layer_Subdivisiones20232024_2},
                     ]
                 },
                 {
@@ -402,7 +401,7 @@
             var searchControl = new L.Control.Search({
                 layer: layer_Subdivisiones20232024_2,
                 initial: false,
-                hideMarkerOnCollapse: true,
+                hideMarkerOnCollapse: true, 
                 propertyName: 'rol',
                 textPlaceholder: 'Buscar ROL...',
                 collapsed: true
@@ -415,28 +414,28 @@
 
                 var layerFound = e.layer; // Esta es la capa GeoJSON de la subdivisión encontrada
                 var centroid = layerFound.getBounds().getCenter(); // Obtiene el centroide de la subdivisión
+                var rolValue = layerFound.feature.properties['rol']; // Obtiene el valor del ROL
 
-                // Crea y añade el marcador temporal para el ROL
-                rolSearchMarker = L.circleMarker(centroid, {
-                    radius: 8,
-                    color: '#ff0000', // Rojo
-                    fillColor: '#ff0000',
-                    fillOpacity: 0.7
-                }).addTo(map);
+                // Crea y añade un marcador PREDETERMINADO (el pin azul de Leaflet)
+                // con el ROL como texto en el popup
+                rolSearchMarker = L.marker(centroid).addTo(map)
+                    .bindPopup('<b>ROL:</b> ' + (rolValue !== null ? autolinker.link(String(rolValue).replace(/'/g, '\'').toLocaleString()) : 'No disponible'))
+                    .openPopup();
 
-                // Hace zoom a los límites de la subdivisión encontrada
-                map.fitBounds(layerFound.getBounds());
+                // Hace zoom directamente al marcador (con un nivel de zoom específico, por ejemplo 15)
+                map.setView(centroid, 15); // Nivel de zoom 15 es un buen valor para ver el detalle. Ajusta si es necesario.
                 
-                // Abre el popup de la subdivisión encontrada
+                // Abre el popup de la subdivisión completa (con los desplegables)
+                // Nota: Este popup se mostrará al lado del marcador, proporcionando la información detallada.
                 layerFound.openPopup();
 
-                // Para asegurar que el popup y el marcador se cierren si el usuario hace clic en otro lado
+
+                // Para asegurar que el popup del rol y el marcador se cierren si el usuario hace clic en otro lado
                 map.on('click', cleanUpTemporaryMarkers);
-                rolSearchMarker.on('click', function(event) {
-                    // Previene que el clic en el marcador también cierre el popup si se abre en el mismo evento
-                    L.DomEvent.stopPropagation(event);
+                rolSearchMarker.on('popupclose', function() {
+                    cleanUpTemporaryMarkers();
                 });
-                layerFound.on('popupclose', function() {
+                layerFound.on('popupclose', function() { // Si el popup principal se cierra, limpia todo
                     cleanUpTemporaryMarkers();
                 });
             });
