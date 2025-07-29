@@ -456,22 +456,28 @@
             var coordSearchMarker = null;
             var rolSearchMarker = null; // Marcador para la búsqueda de rol
 
-            // Función para limpiar cualquier marcador temporal activo
+            // FEATURE_GLOBAL_POPUP_REF: Una referencia al popup de la característica de la capa, si está abierto por la búsqueda de ROL
+            var featureGlobalPopupRef = null;
+
+            // Función para limpiar cualquier marcador temporal activo y popups
             function cleanUpTemporaryMarkers() {
                 if (coordSearchMarker) {
                     map.removeLayer(coordSearchMarker);
                     coordSearchMarker = null;
                 }
-                if (rolSearchMarker) { // Limpiar marcador de rol
+                if (rolSearchMarker) {
                     map.removeLayer(rolSearchMarker);
                     rolSearchMarker = null;
                 }
-                // Si la capa de subdivisiones tenía un popup abierto por una búsqueda previa, ciérralo.
-                layer_Subdivisiones20232024_2.eachLayer(function(layer) {
-                    if (layer.isPopupOpen()) {
-                        layer.closePopup();
-                    }
-                });
+                // Cierra explícitamente el popup de la característica si fue abierto por la búsqueda de ROL
+                if (featureGlobalPopupRef && featureGlobalPopupRef.isPopupOpen()) {
+                    featureGlobalPopupRef.closePopup();
+                    featureGlobalPopupRef = null; // Limpia la referencia
+                }
+
+                // Asegúrate de que no haya otros popups abiertos de forma "fantasma"
+                map.closePopup(); // Cierra cualquier popup abierto en el mapa
+
                 map.off('click', cleanUpTemporaryMarkers); // Desactivar el listener click para limpiar
                 hideRolSuggestions(); // Ocultar sugerencias de ROL al limpiar
             }
@@ -693,10 +699,23 @@
 
             // Ocultar sugerencias cuando se hace clic fuera del buscador de rol
             map.on('click', function(e) {
+                // Verificar si el clic fue dentro del contenedor del buscador de ROL.
+                // Si no fue dentro, ocultar las sugerencias.
                 if (!rolSearchControlInstance.getContainer().contains(e.originalEvent.target)) {
                     hideRolSuggestions();
                 }
+                // Si el clic no fue para limpiar el mapa después de una búsqueda de ROL o coordenada,
+                // y no hay popups abiertos por la búsqueda de ROL, entonces no limpies.
+                // Esto permite que los popups normales de la capa funcionen.
+                if (e.originalEvent.target !== map.getContainer() && map.getPopup() && map.getPopup()._source !== rolSearchMarker && featureGlobalPopupRef !== map.getPopup()._source) {
+                    // Si el popup abierto no es el de nuestro marcador de búsqueda o el de la feature encontrada,
+                    // significa que es un popup normal de la capa, así que no lo cierres con cleanUpTemporaryMarkers.
+                    return; 
+                }
+                cleanUpTemporaryMarkers();
             });
+
+
             // También ocultar si se pierde el foco del input y no es el contenedor de sugerencias
             rolInput.addEventListener('blur', function() {
                 setTimeout(() => { // Pequeño retraso para permitir clics en sugerencias
@@ -741,11 +760,13 @@
                     // lo que puede mejorar la fiabilidad.
                     setTimeout(() => {
                         foundFeature.openPopup(center);
+                        // Guarda una referencia a la capa (foundFeature) cuyo popup se abrió.
+                        // Esto nos permitirá cerrarlo explícitamente en cleanUpTemporaryMarkers.
+                        featureGlobalPopupRef = foundFeature; 
                     }, 200); // Pequeño retraso de 200ms
 
-                    // Configurar el listener para limpiar el marcador al hacer clic en el mapa
-                    map.on('click', cleanUpTemporaryMarkers);
-                    // Configurar el listener para limpiar el marcador si se cierra su propio popup
+                    // NO activamos map.on('click', cleanUpTemporaryMarkers); aquí
+                    // Solo el cierre del popup del marcador o del popup de la feature limpia.
                     rolSearchMarker.on('popupclose', function() {
                         cleanUpTemporaryMarkers();
                     });
