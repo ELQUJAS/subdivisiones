@@ -19,85 +19,96 @@
                 padding: 0;
                 margin: 0;
             }
-            /* Estilos mejorados para el buscador de coordenadas */
+            /* Estilos minimalistas para el buscador de coordenadas */
             .coordenadas-buscador {
-                padding: 12px;
-                background-color: #ffffff;
-                border-radius: 8px;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+                padding: 8px; /* Padding reducido */
+                background-color: rgba(255, 255, 255, 0.9); /* Fondo ligeramente transparente */
+                border-radius: 5px; /* Bordes más sutiles */
+                box-shadow: 0 2px 8px rgba(0,0,0,0.15); /* Sombra más suave */
                 margin-top: 10px;
                 position: relative;
                 z-index: 1000;
-                width: 280px;
+                width: 220px; /* Ancho más pequeño */
                 font-family: Arial, sans-serif;
                 color: #333;
                 box-sizing: border-box;
+                display: flex; /* Para organizar input y botón en línea */
+                align-items: center; /* Alinear verticalmente */
             }
 
             .coordenadas-buscador span {
-                display: block;
-                font-weight: bold;
-                margin-bottom: 10px;
-                color: #555;
+                display: none; /* Ocultar el título "Buscar por Coordenadas" */
             }
 
             .coordenadas-buscador input {
-                width: calc(100% - 80px);
-                padding: 8px 12px;
-                margin-right: 8px;
-                border: 1px solid #dcdcdc;
-                border-radius: 5px;
+                flex-grow: 1; /* El input tomará el espacio restante */
+                padding: 6px 10px; /* Padding más pequeño */
+                margin-right: 5px;
+                border: 1px solid #ccc; /* Borde más claro */
+                border-radius: 3px;
                 box-sizing: border-box;
-                display: inline-block;
-                vertical-align: middle;
-                font-size: 0.95em;
+                font-size: 0.85em; /* Fuente más pequeña */
                 color: #333;
-                transition: border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+                transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            }
+
+            .coordenadas-buscador input::placeholder {
+                color: #999;
+                font-size: 0.9em;
             }
 
             .coordenadas-buscador input:focus {
-                border-color: #66afe9;
-                box-shadow: 0 0 5px rgba(102, 175, 233, 0.6);
+                border-color: #007bff; /* Azul al enfocar */
+                box-shadow: 0 0 4px rgba(0, 123, 255, 0.4);
                 outline: none;
             }
 
             .coordenadas-buscador button {
-                padding: 8px 15px;
+                padding: 6px 10px; /* Padding más pequeño */
                 background-color: #007bff;
                 color: white;
                 border: none;
-                border-radius: 5px;
+                border-radius: 3px;
                 cursor: pointer;
-                display: inline-block;
-                vertical-align: middle;
-                font-size: 0.95em;
-                font-weight: bold;
-                transition: background-color 0.3s ease-in-out, transform 0.1s ease-in-out;
+                font-size: 0.85em; /* Fuente más pequeña */
+                font-weight: normal; /* Texto más ligero */
+                transition: background-color 0.2s ease-in-out;
             }
 
             .coordenadas-buscador button:hover {
                 background-color: #0056b3;
-                transform: translateY(-1px);
             }
 
             .coordenadas-buscador button:active {
                 background-color: #004085;
-                transform: translateY(0);
             }
 
             #resultadoBusqueda {
-                font-size: 0.85em;
-                margin-top: 10px;
+                font-size: 0.75em; /* Texto de resultado aún más pequeño */
+                margin-top: 5px; /* Espacio reducido */
                 color: #dc3545;
                 font-weight: normal;
-                padding-left: 5px;
+                position: absolute; /* Para que no afecte el layout del input/boton */
+                width: calc(100% - 16px); /* Ancho del padding */
+                bottom: -20px; /* Colocar debajo del input/boton */
+                left: 8px; /* Alinear con el padding izquierdo */
+                text-align: center; /* Centrar texto */
             }
 
+            /* Estilos existentes para otros elementos de control */
             .leaflet-control-layers {
                 z-index: 1000;
             }
             .leaflet-control-layers-base span {
-                display: none;
+                display: none; /* Oculta el span de "Buscar por Coordenadas" del control de capas */
+            }
+            .leaflet-bar.leaflet-control.leaflet-control-search {
+                /* Ajuste el margen superior del control de búsqueda principal si es necesario */
+                margin-top: 10px;
+                top: 55px; /* Ajusta esta posición para que no choque con el buscador de coordenadas */
+                right: 10px;
+                position: absolute; /* Asegura que la posición sea relativa al mapa */
+                left: unset; /* Deshacer cualquier estilo de left si lo hubiera */
             }
         </style>
         <title></title>
@@ -106,15 +117,10 @@
         <div id="map">
         </div>
 
-        <div class="leaflet-control-layers leaflet-control" style="position: absolute; top: 100px; right: 10px; width: auto;">
-            <div class="leaflet-control-layers-overlays" style="display: block;">
-                <div class="coordenadas-buscador">
-                    <span>Buscar por Coordenadas</span>
-                    <input type="text" id="coordenadasInput" placeholder="Latitud Longitud (ej: -39.28 -72.24)">
-                    <button id="buscarCoordenadas">Buscar</button>
-                    <div id="resultadoBusqueda"></div>
-                </div>
-            </div>
+        <div class="coordenadas-buscador leaflet-control" style="position: absolute; top: 10px; right: 10px; width: auto;">
+            <input type="text" id="coordenadasInput" placeholder="Lat, Lon (ej: -39.28 -72.24)">
+            <button id="buscarCoordenadas">Buscar</button>
+            <div id="resultadoBusqueda"></div>
         </div>
 
         <script src="js/qgis2web_expressions.js"></script>
@@ -339,16 +345,6 @@
                 var latlng = e.latlng;
                 var rolInfo = e.layer.feature.properties.rol;
 
-                // Puedes personalizar el icono del marcador si lo deseas
-                // var customIcon = L.icon({
-                //     iconUrl: 'ruta/a/tu/icono.png', // Reemplaza con la ruta a tu imagen de icono
-                //     iconSize: [38, 38],
-                //     iconAnchor: [19, 38],
-                //     popupAnchor: [0, -30]
-                // });
-                // rolSearchMarker = L.marker(latlng, {icon: customIcon}).addTo(map);
-
-                // Usamos el marcador por defecto de Leaflet
                 rolSearchMarker = L.marker(latlng).addTo(map);
                 rolSearchMarker.bindPopup(`<b>Rol Encontrado:</b><br>${rolInfo}`).openPopup();
 
@@ -398,8 +394,11 @@
                     const inputValue = coordenadasInput.value.trim();
                     const parts = inputValue.split(/\s+/);
 
+                    // Limpiar el mensaje de resultado anterior
+                    resultadoDiv.textContent = '';
+
                     if (parts.length !== 2) {
-                        resultadoDiv.textContent = 'Formato incorrecto. Ingresa Latitud y Longitud separadas por un espacio (ej: -39.28 -72.24).';
+                        resultadoDiv.textContent = 'Formato: Lat, Lon';
                         return;
                     }
 
@@ -407,49 +406,31 @@
                     const lng = parseFloat(parts[1]);
 
                     if (isNaN(lat) || isNaN(lng)) {
-                        resultadoDiv.textContent = 'Por favor, introduce coordenadas numéricas válidas.';
+                        resultadoDiv.textContent = 'Coordenadas inválidas.';
                         return;
                     }
 
-                    const tolerancia = 0.005; // Margen para encontrar subdivisiones cercanas
+                    // No intentar abrir el popup de una subdivisión, solo colocar el marcador de coordenadas
+                    map.setView([lat, lng], 15); // Centra y hace zoom
 
-                    let encontrado = false;
-                    layer_Subdivisiones20232024_2.eachLayer(function (layer) {
-                        const bounds = layer.getBounds();
-                        if (bounds.isValid() &&
-                            lat >= (bounds.getSouth() - tolerancia) &&
-                            lat <= (bounds.getNorth() + tolerancia) &&
-                            lng >= (bounds.getWest() - tolerancia) &&
-                            lng <= (bounds.getEast() + tolerancia))
-                        {
-                            map.setView([lat, lng], 17);
-                            layer.openPopup();
-                            resultadoDiv.textContent = 'Subdivisión cercana encontrada. Centrando el mapa.';
-                            encontrado = true;
-                            return; // Salir del bucle una vez encontrada
-                        }
-                    });
+                    coordSearchMarker = L.marker([lat, lng]).addTo(map);
+                    // Formatea las coordenadas para que sean más legibles en el popup
+                    const formattedLat = lat.toFixed(4); // Limita a 4 decimales
+                    const formattedLng = lng.toFixed(4); // Limita a 4 decimales
+                    coordSearchMarker.bindPopup(`<b>Coordenadas:</b><br>${formattedLat}, ${formattedLng}`).openPopup();
 
-                    if (!encontrado) {
-                        resultadoDiv.textContent = 'No se encontraron subdivisiones cercanas a las coordenadas proporcionadas. Se ha añadido un marcador en la ubicación.';
-                        map.setView([lat, lng], 15);
+                    // Activar el listener para limpiar el marcador al hacer clic en el mapa
+                    map.on('click', cleanUpTemporaryMarkers);
 
-                        coordSearchMarker = L.marker([lat, lng]).addTo(map);
-                        coordSearchMarker.bindPopup(`<b>Coordenadas Buscadas:</b><br>${lat}, ${lng}`).openPopup();
-
-                        // Activar el listener para limpiar el marcador al hacer clic en el mapa
-                        map.on('click', cleanUpTemporaryMarkers);
-
-                        // Asegurarse de que el marcador desaparezca si se cierra su popup manualmente
-                        coordSearchMarker.on('popupclose', function() {
-                            cleanUpTemporaryMarkers();
-                        });
-
-                    } else {
-                        resultadoDiv.textContent = '';
-                        // Si se encontró una subdivisión, asegúrate de que no quede ningún marcador temporal
+                    // Asegurarse de que el marcador desaparezca si se cierra su popup manualmente
+                    coordSearchMarker.on('popupclose', function() {
                         cleanUpTemporaryMarkers();
-                    }
+                    });
+                });
+
+                // Listener para el campo de entrada (opcional, para borrar el mensaje de error al escribir)
+                coordenadasInput.addEventListener('input', function() {
+                    resultadoDiv.textContent = '';
                 });
             });
         </script>
