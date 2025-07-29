@@ -423,8 +423,7 @@
                 propertyName: 'rol',
                 textPlaceholder: 'Buscar ROL...',
                 collapsed: true,
-                // Quita el marcador por defecto de la librería Leaflet-Search
-                marker: false // Importante: desactiva el marcador por defecto
+                marker: false // Importante: desactiva el marcador por defecto de leaflet-search
             });
             map.addControl(searchControl);
 
@@ -436,7 +435,7 @@
                 var centroid = layerFound.getBounds().getCenter(); // Obtiene el centroide de la subdivisión
                 var rolValue = layerFound.feature.properties['rol']; // Obtiene el valor del ROL
 
-                // Genera un nuevo marcador con el icono por defecto de Leaflet
+                // --- Genera un marcador similar al de coordenadas ---
                 rolSearchMarker = L.marker(centroid).addTo(map)
                     .bindPopup('<b>ROL:</b> ' + (rolValue !== null ? autolinker.link(String(rolValue).replace(/'/g, '\'').toLocaleString()) : 'No disponible'))
                     .openPopup();
@@ -508,7 +507,6 @@
                 map.setView([lat, lng], 15);
 
                 coordSearchMarker = L.marker([lat, lng]).addTo(map);
-                // --- CAMBIO AQUÍ: formattedLat y formattedLng ahora usan toFixed(6) ---
                 const formattedLat = lat.toFixed(6); 
                 const formattedLng = lng.toFixed(6);
                 coordSearchMarker.bindPopup(`<b>Coordenadas:</b><br>${formattedLat}, ${formattedLng}`).openPopup();
