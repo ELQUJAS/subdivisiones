@@ -435,10 +435,10 @@
                 var centroid = layerFound.getBounds().getCenter(); // Obtiene el centroide de la subdivisión
                 var rolValue = layerFound.feature.properties['rol']; // Obtiene el valor del ROL
 
-                // --- Genera un marcador similar al de coordenadas ---
+                // *** ESTE ES EL CÓDIGO CLAVE PARA AÑADIR EL MARCADOR AL BUSCADOR DE ROL ***
                 rolSearchMarker = L.marker(centroid).addTo(map)
                     .bindPopup('<b>ROL:</b> ' + (rolValue !== null ? autolinker.link(String(rolValue).replace(/'/g, '\'').toLocaleString()) : 'No disponible'))
-                    .openPopup();
+                    .openPopup(); // Abre el popup del marcador
 
                 // Hace zoom al marcador (y por lo tanto al centroide del polígono)
                 map.setView(centroid, 15); // Nivel de zoom 15, puedes ajustarlo si lo deseas
