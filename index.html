@@ -19,21 +19,20 @@
                 padding: 0;
                 margin: 0;
             }
-            /* Estilos minimalistas para el buscador de coordenadas */
-            /* Se ha ajustado el estilo para que se comporte como un control Leaflet */
+            /* Estilos para el buscador de coordenadas */
             .coordenadas-buscador.leaflet-control {
-                padding: 8px;
+                padding: 10px; /* Aumentado el padding para hacerlo más grande */
                 background-color: rgba(255, 255, 255, 0.9);
                 border-radius: 5px;
                 box-shadow: 0 2px 8px rgba(0,0,0,0.15);
                 z-index: 1000;
-                width: 220px; /* Mantener ancho fijo */
+                width: 250px; /* Ancho aumentado */
                 font-family: Arial, sans-serif;
                 color: #333;
                 box-sizing: border-box;
                 display: flex;
-                align-items: center;
-                /* Eliminamos el top/right/position aquí porque Leaflet.Control lo manejará */
+                flex-direction: column; /* Cambiado a columna para apilar input y botón */
+                align-items: flex-start; /* Alinea los elementos a la izquierda */
             }
 
             .coordenadas-buscador span {
@@ -41,13 +40,13 @@
             }
 
             .coordenadas-buscador input {
-                flex-grow: 1;
-                padding: 6px 10px;
-                margin-right: 5px;
+                width: 100%; /* El input ocupa todo el ancho disponible */
+                padding: 8px 12px; /* Padding ajustado */
+                margin-bottom: 8px; /* Espacio debajo del input */
                 border: 1px solid #ccc;
                 border-radius: 3px;
                 box-sizing: border-box;
-                font-size: 0.85em;
+                font-size: 0.95em; /* Fuente ligeramente más grande */
                 color: #333;
                 transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
             }
@@ -64,13 +63,14 @@
             }
 
             .coordenadas-buscador button {
-                padding: 6px 10px;
+                width: 100%; /* El botón ocupa todo el ancho disponible */
+                padding: 8px 12px; /* Padding ajustado */
                 background-color: #007bff;
                 color: white;
                 border: none;
                 border-radius: 3px;
                 cursor: pointer;
-                font-size: 0.85em;
+                font-size: 0.95em; /* Fuente ligeramente más grande */
                 font-weight: normal;
                 transition: background-color 0.2s ease-in-out;
             }
@@ -84,23 +84,19 @@
             }
 
             #resultadoBusqueda {
-                font-size: 0.75em;
+                font-size: 0.8em; /* Texto de resultado un poco más grande */
                 margin-top: 5px;
                 color: #dc3545;
                 font-weight: normal;
-                position: absolute;
-                width: calc(100% - 16px);
-                bottom: -20px;
-                left: 8px;
                 text-align: center;
+                width: 100%; /* Ocupa todo el ancho del contenedor */
             }
 
             /* Estilos para el control de capas (leyenda) */
-            /* Mantenemos la leyenda en topright, su posición original con qgis2web */
             .leaflet-control-layers {
                 z-index: 1000;
                 position: absolute;
-                top: 10px;
+                top: 10px; /* Se mantiene en la parte superior derecha */
                 right: 10px;
                 left: unset;
             }
@@ -115,10 +111,9 @@
             }
 
             /* Ajuste para el control de búsqueda (roles) */
-            /* Mantenemos el buscador de roles a la izquierda de la leyenda/buscador de coordenadas */
             .leaflet-bar.leaflet-control.leaflet-control-search {
                 top: 10px;
-                right: 250px; /* Ajusta este valor si la leyenda o el buscador de coordenadas son más anchos */
+                right: 280px; /* Ajustado para dejar espacio al buscador de coordenadas */
                 position: absolute;
                 left: unset;
             }
@@ -384,6 +379,25 @@
             const buscarBoton = coordsSearchControlInstance.getContainer().querySelector('#buscarCoordenadas');
             const resultadoDiv = coordsSearchControlInstance.getContainer().querySelector('#resultadoBusqueda');
 
+            // --- Posicionar el buscador de coordenadas más abajo ---
+            // Una vez que el control se ha añadido y renderizado, ajustamos su 'top'
+            // Esto se hace con un pequeño retraso para asegurar que el DOM esté listo.
+            setTimeout(function() {
+                const legendControl = document.querySelector('.leaflet-control-layers');
+                const coordSearchControlElement = coordsSearchControlInstance.getContainer();
+
+                if (legendControl && coordSearchControlElement) {
+                    // Obtener la posición inferior de la leyenda
+                    const legendBottom = legendControl.getBoundingClientRect().bottom;
+                    // Obtener la posición superior del mapa para calcular un 'top' relativo
+                    const mapTop = map.getContainer().getBoundingClientRect().top;
+
+                    // Establecer el 'top' del buscador de coordenadas
+                    // Sumamos un margen (ej. 20px) al final de la leyenda
+                    coordSearchControlElement.style.top = (legendBottom - mapTop + 20) + 'px';
+                }
+            }, 100); // Pequeño retraso para asegurar que los elementos estén renderizados
+
             // --- Configuración del control de búsqueda de roles ---
             var searchControl = new L.Control.Search({
                 layer: layer_Subdivisiones20232024_2,
@@ -480,9 +494,6 @@
             map.on('search:collapsed', function(e) { });
 
             // qgis2web assigns search button icons. Ensure they are correctly assigned.
-            // This part might need to be adjusted based on the specific version of qgis2web
-            // or if other search controls are present.
-            // Simplified check based on typical qgis2web output structure.
             document.querySelectorAll('.leaflet-control-search .search-button').forEach(button => {
                 if (!button.classList.contains('fa-binoculars')) {
                     button.classList.add('fa', 'fa-binoculars');
@@ -501,8 +512,6 @@
             });
 
             // JavaScript para la funcionalidad del buscador de coordenadas
-            // Ahora se adjuntan a los elementos del DOM después de que el control se ha añadido al mapa
-            // (cuando coordsSearchControlInstance.getContainer() esté disponible).
             buscarBoton.addEventListener('click', function() {
                 cleanUpTemporaryMarkers();
 
