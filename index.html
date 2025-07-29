@@ -250,19 +250,14 @@
 
             // --- Capa de información (Subdivisiones) ---
             function pop_Subdivisiones20232024_2(feature, layer) {
-                // Modificación aquí: Creando el contenido del popup con <details>/<summary>
-                var popupContent = '<h4>ROL: ' + (feature.properties['rol'] !== null ? autolinker.link(String(feature.properties['rol']).replace(/'/g, '\'').toLocaleString()) : '') + '</h4>';
+                var popupContent = '<h4>ROL: ' + (feature.properties['rol'] !== null ? autolinker.link(String(feature.properties['rol']).replace(/'/g, '\'').toLocaleString()) : 'No disponible') + '</h4>';
                 
-                // Función auxiliar para crear un desplegable
                 function createDetails(summaryText, contentValue) {
-                    // Solo crear el desplegable si el valor no es nulo ni vacío
-                    if (contentValue === null || contentValue === '') {
-                        return '';
-                    }
-                    return '<details><summary>' + summaryText + '</summary><p>' + autolinker.link(String(contentValue).replace(/'/g, '\'').toLocaleString()) + '</p></details>';
+                    // Ahora siempre genera el detalle, y usa "Sin información" si el valor es nulo o vacío
+                    var displayValue = (contentValue === null || contentValue === '') ? 'Sin información' : autolinker.link(String(contentValue).replace(/'/g, '\'').toLocaleString());
+                    return '<details><summary>' + summaryText + '</summary><p>' + displayValue + '</p></details>';
                 }
 
-                // Aplicar createDetails a TODAS las propiedades excepto 'rol'
                 popupContent += createDetails('ZONA PRI', feature.properties['ZONA PRI']);
                 popupContent += createDetails('ZONA/SECTOR', feature.properties['ZONA']);
                 popupContent += createDetails('ZOIT', feature.properties['ZOIT']);
@@ -276,7 +271,6 @@
                 popupContent += createDetails('SUPERFICIE (MT2)', feature.properties['SUPERFICIE']);
                 popupContent += createDetails('DESTINO', feature.properties['DESTINO']);
                 popupContent += createDetails('RECEPCIÓN', feature.properties['RECEPCIÓN']);
-                // Asegúrate de que todas las propiedades que quieras desplegar estén aquí
 
                 var content = removeEmptyRowsFromPopupContent(popupContent, feature);
                 layer.on('popupopen', function(e) {
@@ -320,7 +314,7 @@
                 {
                     label: '<b>Capas de Información</b>',
                     children: [
-                        {label: '<img src="legend/Subdivisiones20232024_2.png" /> Subdivisiones 2023-2024', layer: layer_Subdivisiones20232024_2},
+                        {label: '<img src="legend/Subdivisiones20232024_2.png" /> Subdivisiones 2023-2023', layer: layer_Subdivisiones20232024_2},
                     ]
                 },
                 {
@@ -342,13 +336,21 @@
 
             setBounds();
 
+            // Variables globales para almacenar los marcadores temporales
             var coordSearchMarker = null;
+            var rolSearchMarker = null; // Nuevo marcador para la búsqueda de ROL
 
+            // Función para limpiar cualquier marcador temporal activo
             function cleanUpTemporaryMarkers() {
                 if (coordSearchMarker) {
                     map.removeLayer(coordSearchMarker);
                     coordSearchMarker = null;
                 }
+                if (rolSearchMarker) { // Limpiar el marcador de ROL
+                    map.removeLayer(rolSearchMarker);
+                    rolSearchMarker = null;
+                }
+                // Si la capa de subdivisiones tenía un popup abierto por una búsqueda previa, ciérralo.
                 layer_Subdivisiones20232024_2.eachLayer(function(layer) {
                     if (layer.isPopupOpen()) {
                         layer.closePopup();
@@ -357,6 +359,7 @@
                 map.off('click', cleanUpTemporaryMarkers);
             }
 
+            // --- Buscador de Coordenadas: Ahora se crea dinámicamente como un control personalizado ---
             var CoordsSearchControl = L.Control.extend({
                 onAdd: function(map) {
                     var container = L.DomUtil.create('div', 'coordenadas-buscador leaflet-control');
@@ -374,12 +377,14 @@
                 onRemove: function(map) { }
             });
 
+            // Añadir el control de coordenadas DEPUES de la leyenda en la misma posición 'topright'
             var coordsSearchControlInstance = new CoordsSearchControl({position: 'topright'}).addTo(map);
 
             const coordenadasInput = coordsSearchControlInstance.getContainer().querySelector('#coordenadasInput');
             const buscarBoton = coordsSearchControlInstance.getContainer().querySelector('#buscarCoordenadas');
             const resultadoDiv = coordsSearchControlInstance.getContainer().querySelector('#resultadoBusqueda');
 
+            // --- Posicionar el buscador de coordenadas más abajo ---
             setTimeout(function() {
                 const legendControl = document.querySelector('.leaflet-control-layers');
                 const coordSearchControlElement = coordsSearchControlInstance.getContainer();
@@ -393,6 +398,7 @@
                 }
             }, 500);
 
+            // --- Configuración del control de búsqueda de roles ---
             var searchControl = new L.Control.Search({
                 layer: layer_Subdivisiones20232024_2,
                 initial: false,
@@ -403,16 +409,33 @@
             });
             map.addControl(searchControl);
 
+            // Listener para cuando se encuentra una ubicación por Rol
             map.on('search:locationfound', function(e) {
-                cleanUpTemporaryMarkers();
+                cleanUpTemporaryMarkers(); // Limpia cualquier marcador o popup anterior
 
-                var layerFound = e.layer;
-                
+                var layerFound = e.layer; // Esta es la capa GeoJSON de la subdivisión encontrada
+                var centroid = layerFound.getBounds().getCenter(); // Obtiene el centroide de la subdivisión
+
+                // Crea y añade el marcador temporal para el ROL
+                rolSearchMarker = L.circleMarker(centroid, {
+                    radius: 8,
+                    color: '#ff0000', // Rojo
+                    fillColor: '#ff0000',
+                    fillOpacity: 0.7
+                }).addTo(map);
+
+                // Hace zoom a los límites de la subdivisión encontrada
                 map.fitBounds(layerFound.getBounds());
                 
+                // Abre el popup de la subdivisión encontrada
                 layerFound.openPopup();
 
+                // Para asegurar que el popup y el marcador se cierren si el usuario hace clic en otro lado
                 map.on('click', cleanUpTemporaryMarkers);
+                rolSearchMarker.on('click', function(event) {
+                    // Previene que el clic en el marcador también cierre el popup si se abre en el mismo evento
+                    L.DomEvent.stopPropagation(event);
+                });
                 layerFound.on('popupclose', function() {
                     cleanUpTemporaryMarkers();
                 });
@@ -439,8 +462,9 @@
                 resetLabels([layer_Subdivisiones20232024_2]);
             });
 
+            // JavaScript para la funcionalidad del buscador de coordenadas
             buscarBoton.addEventListener('click', function() {
-                cleanUpTemporaryMarkers();
+                cleanUpTemporaryMarkers(); // Limpia cualquier popup de rol o marcador de coordenadas anterior
 
                 const inputValue = coordenadasInput.value.trim();
                 const parts = inputValue.split(/\s+/);
