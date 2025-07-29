@@ -10,7 +10,6 @@
         <link rel="stylesheet" href="css/L.Control.Layers.Tree.css">
         <link rel="stylesheet" href="css/qgis2web.css">
         <link rel="stylesheet" href="css/fontawesome-all.min.css">
-        <link rel="stylesheet" href="css/leaflet-search.css">
         <link rel="stylesheet" href="css/leaflet.photon.css">
         <style>
             html, body, #map {
@@ -110,43 +109,6 @@
                 display: none;
             }
 
-            /* Ajuste para el control de búsqueda (roles) */
-            .leaflet-bar.leaflet-control.leaflet-control-search {
-                top: 10px;
-                right: 280px; /* Ajustado para dejar espacio al buscador de coordenadas */
-                position: absolute;
-                left: unset;
-            }
-
-            /* Estilo para el botón de búsqueda de ROL (para mostrar solo el icono) */
-            .leaflet-control-search .search-button {
-                font-size: 1.2em; /* Ajusta el tamaño del icono si es necesario */
-                line-height: 26px; /* Para centrar verticalmente el icono */
-                text-align: center;
-                width: 30px; /* Ancho del botón */
-                height: 30px; /* Alto del botón */
-                padding: 0;
-                overflow: hidden; /* Oculta cualquier texto que se desborde */
-                display: flex; /* Para centrar el ícono */
-                justify-content: center; /* Centrado horizontal */
-                align-items: center; /* Centrado vertical */
-                background-color: #fff; /* Fondo del botón, puedes cambiarlo */
-                color: #333; /* Color del icono, puedes cambiarlo */
-            }
-
-            .leaflet-control-search .search-button::before {
-                /* Esto es para asegurar que el icono de Font Awesome se muestre correctamente */
-                display: block;
-                font-family: "Font Awesome 5 Free"; /* O la familia de tu versión de Font Awesome */
-                font-weight: 900; /* Para iconos solid (fas) */
-                content: "\f1e5"; /* Código Unicode para el icono de binoculares (fa-binoculars) */
-            }
-
-            /* Ocultar el texto dentro del botón si leaflet-search añade texto */
-            .leaflet-control-search .search-button span {
-                display: none;
-            }
-
             /* --- Estilos para los desplegables en el popup (Opción 2) --- */
             .leaflet-popup-content details {
                 margin-bottom: 5px; /* Espacio entre los desplegables */
@@ -203,24 +165,98 @@
                 text-align: center; /* Centrado para una sola línea */
                 z-index: 1000;
             }
-            /* Ocultar el círculo rojo por defecto de leaflet-search */
-            .leaflet-marker-icon.search-marker {
-                display: none !important;
+            
+            /* --- NUEVOS ESTILOS PARA EL BUSCADOR DE ROLES PERSONALIZADO --- */
+            .rol-buscador.leaflet-control {
+                padding: 10px;
+                background-color: rgba(255, 255, 255, 0.9);
+                border-radius: 5px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+                z-index: 1000;
+                width: 250px;
+                font-family: Arial, sans-serif;
+                color: #333;
+                box-sizing: border-box;
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+                /* Posición por defecto, ajustado por JS */
+                position: absolute;
+                top: 10px; /* Ejemplo, será sobrescrito */
+                right: 280px; /* Ejemplo, será sobrescrito */
+                left: unset;
             }
 
-            /* NUEVO ESTILO: Para el contenedor del icono personalizado del buscador de ROL */
-            .custom-search-marker {
-                background: none; /* Asegura que no haya fondo blanco del divIcon */
-                border: none; /* Sin borde */
-                box-shadow: none; /* Sin sombra */
-                display: flex; /* Para centrar el icono dentro del div */
+            .rol-buscador input {
+                width: 100%;
+                padding: 8px 12px;
+                margin-bottom: 8px;
+                border: 1px solid #ccc;
+                border-radius: 3px;
+                box-sizing: border-box;
+                font-size: 0.95em;
+                color: #333;
+                transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            }
+
+            .rol-buscador input::placeholder {
+                color: #999;
+                font-size: 0.9em;
+            }
+
+            .rol-buscador input:focus {
+                border-color: #007bff;
+                box-shadow: 0 0 4px rgba(0, 123, 255, 0.4);
+                outline: none;
+            }
+
+            .rol-buscador button {
+                width: 100%;
+                padding: 8px 12px;
+                background-color: #28a745; /* Color verde para el botón de ROL */
+                color: white;
+                border: none;
+                border-radius: 3px;
+                cursor: pointer;
+                font-size: 0.95em;
+                font-weight: normal;
+                transition: background-color 0.2s ease-in-out;
+            }
+
+            .rol-buscador button:hover {
+                background-color: #218838;
+            }
+
+            .rol-buscador button:active {
+                background-color: #1e7e34;
+            }
+
+            #resultadoRolBusqueda {
+                font-size: 0.8em;
+                margin-top: 5px;
+                color: #dc3545; /* Rojo para errores */
+                font-weight: normal;
+                text-align: center;
+                width: 100%;
+            }
+            #resultadoRolBusqueda.success {
+                color: #28a745; /* Verde para éxito */
+            }
+
+            /* Estilos para el marcador personalizado del buscador de ROL */
+            .rol-search-marker-icon {
+                background: none;
+                border: none;
+                box-shadow: none;
+                display: flex;
                 justify-content: center;
                 align-items: center;
             }
 
-            /* Opcional: Ajustes para el icono de Font Awesome si no se ve bien */
-            .custom-search-marker i {
-                text-shadow: 1px 1px 2px rgba(0,0,0,0.5); /* Agrega una pequeña sombra para que se destaque */
+            .rol-search-marker-icon i {
+                text-shadow: 1px 1px 2px rgba(0,0,0,0.5); /* Agrega sombra para que resalte */
+                font-size: 2.5em; /* Icono un poco más grande */
+                color: #ffc107; /* Color amarillo/naranja para el marcador */
             }
 
         </style>
@@ -241,7 +277,6 @@
         <script src="js/labelgun.min.js"></script>
         <script src="js/labels.js"></script>
         <script src="js/leaflet.photon.js"></script>
-        <script src="js/leaflet-search.js"></script>
         <script src="data/Subdivisiones20232024_2.js"></script>
         <script>
             var map = L.map('map', {
@@ -401,16 +436,20 @@
             var coordSearchMarker = null;
             var rolSearchMarker = null; // Marcador específico para la búsqueda de ROL
 
-            // Función para limpiar cualquier marcador temporal activo (incluido el de búsqueda de coordenadas)
+            // Función para limpiar cualquier marcador temporal activo (incluido el de búsqueda de coordenadas y ROL)
             function cleanUpTemporaryMarkers() {
                 if (coordSearchMarker) {
                     map.removeLayer(coordSearchMarker);
                     coordSearchMarker = null;
                 }
-                if (rolSearchMarker) { // Limpiar el marcador de ROL
+                if (rolSearchMarker) {
                     map.removeLayer(rolSearchMarker);
                     rolSearchMarker = null;
                 }
+                // Limpiar mensajes de resultado
+                document.getElementById('resultadoRolBusqueda').textContent = '';
+                document.getElementById('resultadoBusqueda').textContent = '';
+
                 // Si la capa de subdivisiones tenía un popup abierto por una búsqueda previa, ciérralo.
                 layer_Subdivisiones20232024_2.eachLayer(function(layer) {
                     if (layer.isPopupOpen()) {
@@ -438,7 +477,7 @@
                 onRemove: function(map) { }
             });
 
-            // Añadir el control de coordenadas DEPUES de la leyenda en la misma posición 'topright'
+            // Añadir el control de coordenadas
             var coordsSearchControlInstance = new CoordsSearchControl({position: 'topright'}).addTo(map);
 
             const coordenadasInput = coordsSearchControlInstance.getContainer().querySelector('#coordenadasInput');
@@ -449,88 +488,108 @@
             setTimeout(function() {
                 const legendControl = document.querySelector('.leaflet-control-layers');
                 const coordSearchControlElement = coordsSearchControlInstance.getContainer();
+                const rolSearchControlElement = document.querySelector('.rol-buscador'); // Obtener el elemento del buscador de ROL
 
-                if (legendControl && coordSearchControlElement) {
+                if (legendControl && coordSearchControlElement && rolSearchControlElement) {
                     const legendRect = legendControl.getBoundingClientRect();
+                    const rolRect = rolSearchControlElement.getBoundingClientRect();
                     const mapRect = map.getContainer().getBoundingClientRect();
                     
-                    coordSearchControlElement.style.top = (legendRect.bottom - mapRect.top + 20) + 'px';
+                    // Posiciona el buscador de coordenadas debajo del buscador de roles (si existe)
+                    coordSearchControlElement.style.top = (rolRect.bottom - mapRect.top + 20) + 'px';
                     coordSearchControlElement.style.right = '10px';
                 }
             }, 500);
 
-            // --- Configuración del control de búsqueda de roles ---
-            var searchControl = new L.Control.Search({
-                layer: layer_Subdivisiones20232024_2,
-                initial: false,
-                hideMarkerOnCollapse: true,
-                propertyName: 'rol',
-                // textPlaceholder: 'Buscar ROL...', // Comentado para que solo se vea el icono del botón
-                collapsed: true,
-                marker: false // Importante: desactiva el marcador por defecto de leaflet-search
-            });
-            map.addControl(searchControl);
 
-            // Listener para cuando se encuentra una ubicación por Rol
-            map.on('search:locationfound', function(e) {
-                cleanUpTemporaryMarkers(); // Limpia cualquier marcador o popup anterior
+            // --- NUEVO BUSCADOR DE ROLES PERSONALIZADO ---
+            var RolSearchControl = L.Control.extend({
+                onAdd: function(map) {
+                    var container = L.DomUtil.create('div', 'rol-buscador leaflet-control');
+                    container.innerHTML = `
+                        <input type="text" id="rolInput" placeholder="Buscar ROL (ej: 1234-5)">
+                        <button id="buscarRol">Buscar ROL</button>
+                        <div id="resultadoRolBusqueda"></div>
+                    `;
 
-                var layerFound = e.layer; // Esta es la capa GeoJSON de la subdivisión encontrada
-                var centroid = layerFound.getBounds().getCenter(); // Obtiene el centroide de la subdivisión
-                var rolValue = layerFound.feature.properties['rol']; // Obtiene el valor del ROL
+                    L.DomEvent.disableClickPropagation(container);
+                    L.DomEvent.disableScrollPropagation(container);
 
-                // *** CÓDIGO CLAVE PARA AÑADIR EL MARCADOR CON SÍMBOLO PERSONALIZADO AL BUSCADOR DE ROL ***
-                // Crea un icono personalizado con Font Awesome
-                var customRolIcon = L.divIcon({
-                    className: 'custom-search-marker', // Clase CSS para estilizar el contenedor del icono
-                    // Aquí puedes cambiar el icono y su color:
-                    html: '<i class="fas fa-map-marker-alt fa-2x" style="color: #007bff;"></i>', // Icono de pin de mapa azul (ejemplo)
-                    // Otros ejemplos:
-                    // html: '<i class="fas fa-eye fa-2x" style="color: #28a745;"></i>', // Un ojo verde
-                    // html: '<i class="fas fa-home fa-2x" style="color: #ffc107;"></i>', // Una casa amarilla
-                    // html: '<i class="fas fa-search-location fa-2x" style="color: purple;"></i>', // Lupa con ubicación morada
-                    iconSize: [30, 42], // Ajusta el tamaño del contenedor del icono [width, height]
-                    iconAnchor: [15, 42] // Punto donde "ancla" el icono al punto de la coordenada (la punta del pin)
-                });
-
-                // Crea el marcador de Leaflet usando el icono personalizado
-                rolSearchMarker = L.marker(centroid, { icon: customRolIcon }).addTo(map)
-                    .bindPopup('<b>ROL:</b> ' + (rolValue !== null ? autolinker.link(String(rolValue).replace(/'/g, '\'').toLocaleString()) : 'No disponible'))
-                    .openPopup(); // Abre el popup del marcador
-
-                // Hace zoom al marcador (y por lo tanto al centroide del polígono)
-                map.setView(centroid, 15); // Nivel de zoom 15, puedes ajustarlo si lo deseas
-                
-                // Abre el popup del polígono encontrado, si es necesario
-                layerFound.openPopup();
-
-                // Añadir un listener al mapa para limpiar los marcadores al hacer click fuera
-                map.on('click', cleanUpTemporaryMarkers);
-
-                // También limpia los marcadores si se cierra el popup del marcador de búsqueda
-                rolSearchMarker.on('popupclose', function() {
-                    cleanUpTemporaryMarkers();
-                });
-                // Y si se cierra el popup del polígono
-                layerFound.on('popupclose', function() { 
-                    cleanUpTemporaryMarkers();
-                });
+                    return container;
+                },
+                onRemove: function(map) { }
             });
 
-            // Listener para cuando la búsqueda de rol se colapsa (manual o automáticamente)
-            map.on('search:collapsed', function(e) {
-                cleanUpTemporaryMarkers(); // Limpia los marcadores cuando el buscador se "cierra"
+            var rolSearchControlInstance = new RolSearchControl({position: 'topright'}).addTo(map);
+
+            const rolInput = rolSearchControlInstance.getContainer().querySelector('#rolInput');
+            const buscarRolBoton = rolSearchControlInstance.getContainer().querySelector('#buscarRol');
+            const resultadoRolDiv = rolSearchControlInstance.getContainer().querySelector('#resultadoRolBusqueda');
+
+            buscarRolBoton.addEventListener('click', function() {
+                cleanUpTemporaryMarkers(); // Limpia cualquier marcador o mensaje anterior
+
+                const searchRolValue = rolInput.value.trim().toUpperCase(); // Convertir a mayúsculas para coincidencia
+
+                if (!searchRolValue) {
+                    resultadoRolDiv.textContent = 'Por favor, ingrese un ROL.';
+                    resultadoRolDiv.className = 'error'; // Clase para estilo de error
+                    return;
+                }
+
+                let foundLayer = null;
+
+                // Itera sobre las capas de subdivisión para encontrar el ROL
+                layer_Subdivisiones20232024_2.eachLayer(function(layer) {
+                    if (layer.feature && layer.feature.properties && layer.feature.properties['rol']) {
+                        // Asegura que el valor del ROL en la capa también sea tratado como cadena y mayúsculas
+                        const layerRol = String(layer.feature.properties['rol']).toUpperCase();
+                        if (layerRol === searchRolValue) {
+                            foundLayer = layer;
+                            return; // Sale del eachLayer una vez encontrado
+                        }
+                    }
+                });
+
+                if (foundLayer) {
+                    const centroid = foundLayer.getBounds().getCenter();
+                    const rolValue = foundLayer.feature.properties['rol'];
+
+                    // Crea un icono personalizado con Font Awesome
+                    var customRolSearchIcon = L.divIcon({
+                        className: 'rol-search-marker-icon', // Clase CSS para el contenedor del icono
+                        html: '<i class="fas fa-map-marker-alt" style="color: #ffc107;"></i>', // Icono de pin amarillo/naranja
+                        iconSize: [35, 45], // Tamaño del contenedor del icono [width, height]
+                        iconAnchor: [17, 45] // Punto de anclaje (la punta del pin)
+                    });
+
+                    // Crea el marcador con el icono personalizado
+                    rolSearchMarker = L.marker(centroid, { icon: customRolSearchIcon }).addTo(map)
+                        .bindPopup('<b>ROL:</b> ' + (rolValue !== null ? autolinker.link(String(rolValue).replace(/'/g, '\'').toLocaleString()) : 'No disponible'))
+                        .openPopup();
+
+                    map.setView(centroid, 16); // Zoom a la ubicación encontrada
+                    foundLayer.openPopup(); // Abre el popup del polígono
+
+                    resultadoRolDiv.textContent = `ROL "${searchRolValue}" encontrado.`;
+                    resultadoRolDiv.className = 'success'; // Clase para estilo de éxito
+
+                    // Añadir un listener al mapa para limpiar los marcadores al hacer click fuera
+                    map.on('click', cleanUpTemporaryMarkers);
+                    rolSearchMarker.on('popupclose', cleanUpTemporaryMarkers);
+                    foundLayer.on('popupclose', cleanUpTemporaryMarkers);
+
+                } else {
+                    resultadoRolDiv.textContent = `ROL "${searchRolValue}" no encontrado.`;
+                    resultadoRolDiv.className = 'error'; // Clase para estilo de error
+                }
             });
 
-            // Añadir el icono de binoculares al botón de búsqueda (ahora se controla por CSS ::before)
-            // Este bloque de código ahora es redundante para el icono del botón de búsqueda
-            // si estás usando el método CSS ::before, pero lo mantengo por si lo necesitas
-            // para otras finalidades o una versión diferente de Font Awesome.
-            // document.querySelectorAll('.leaflet-control-search .search-button').forEach(button => {
-            //     if (!button.classList.contains('fa-binoculars')) {
-            //         button.classList.add('fa', 'fa-binoculars');
-            //     }
-            // });
+            rolInput.addEventListener('input', function() {
+                resultadoRolDiv.textContent = ''; // Limpiar mensaje al escribir
+                resultadoRolDiv.className = ''; // Limpiar clase de éxito/error
+            });
+
 
             resetLabels([layer_Subdivisiones20232024_2]);
             map.on("zoomend", function(){
