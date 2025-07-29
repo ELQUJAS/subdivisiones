@@ -161,6 +161,26 @@
                 width: 100px; /* Ancho fijo para las etiquetas de th */
             }
 
+            /* Estilos para el nuevo visualizador de coordenadas combinado */
+            .coordinate-display.leaflet-control {
+                background: rgba(255, 255, 255, 0.9);
+                padding: 8px 10px;
+                border-radius: 5px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+                font-family: Arial, sans-serif;
+                font-size: 0.9em;
+                color: #333;
+                min-width: 240px; /* Ancho suficiente para ambas coordenadas */
+                text-align: left; /* Alineado a la izquierda para mejor lectura */
+                z-index: 1000;
+            }
+            .coordinate-display div {
+                margin-bottom: 3px; /* Espacio entre las líneas de coordenadas */
+            }
+            .coordinate-display div:last-child {
+                margin-bottom: 0;
+            }
+
         </style>
         <title></title>
     </head>
@@ -180,6 +200,7 @@
         <script src="js/labels.js"></script>
         <script src="js/leaflet.photon.js"></script>
         <script src="js/leaflet-search.js"></script>
+        <script src="js/leaflet.utm.min.js"></script> 
         <script src="data/Subdivisiones20232024_2.js"></script>
         <script>
             var map = L.map('map', {
@@ -416,25 +437,19 @@
                 var centroid = layerFound.getBounds().getCenter(); // Obtiene el centroide de la subdivisión
                 var rolValue = layerFound.feature.properties['rol']; // Obtiene el valor del ROL
 
-                // ******** ¡LA CORRECCIÓN CRÍTICA ESTÁ AQUÍ! ********
-                // Asegúrate de que esto diga L.marker y no L.circleMarker
                 rolSearchMarker = L.marker(centroid).addTo(map)
                     .bindPopup('<b>ROL:</b> ' + (rolValue !== null ? autolinker.link(String(rolValue).replace(/'/g, '\'').toLocaleString()) : 'No disponible'))
                     .openPopup();
 
-                // Hace zoom directamente al marcador (con un nivel de zoom específico, por ejemplo 15)
-                map.setView(centroid, 15); // Nivel de zoom 15 es un buen valor para ver el detalle. Ajusta si es necesario.
+                map.setView(centroid, 15); 
                 
-                // Abre el popup de la subdivisión completa (con los desplegables)
-                // Nota: Este popup se mostrará al lado del marcador, proporcionando la información detallada.
                 layerFound.openPopup();
 
-                // Para asegurar que el popup del rol y el marcador se cierren si el usuario hace clic en otro lado
                 map.on('click', cleanUpTemporaryMarkers);
                 rolSearchMarker.on('popupclose', function() {
                     cleanUpTemporaryMarkers();
                 });
-                layerFound.on('popupclose', function() { // Si el popup principal se cierra, limpia todo
+                layerFound.on('popupclose', function() { 
                     cleanUpTemporaryMarkers();
                 });
             });
@@ -462,7 +477,7 @@
 
             // JavaScript para la funcionalidad del buscador de coordenadas
             buscarBoton.addEventListener('click', function() {
-                cleanUpTemporaryMarkers(); // Limpia cualquier popup de rol o marcador de coordenadas anterior
+                cleanUpTemporaryMarkers(); 
 
                 const inputValue = coordenadasInput.value.trim();
                 const parts = inputValue.split(/\s+/);
@@ -498,6 +513,58 @@
             coordenadasInput.addEventListener('input', function() {
                 resultadoDiv.textContent = '';
             });
+
+            // --- Visualizador de coordenadas combinado (Lat/Lon y UTM) ---
+            var CoordinateDisplayControl = L.Control.extend({
+                onAdd: function(map) {
+                    var container = L.DomUtil.create('div', 'coordinate-display leaflet-control');
+                    container.innerHTML = `
+                        <div id="latLonDisplay">Lat: --.-- Lon: --.--</div>
+                        <div id="utmDisplay">UTM: -- E -- N (---)</div>
+                    `;
+                    L.DomEvent.disableClickPropagation(container);
+                    L.DomEvent.disableScrollPropagation(container);
+                    return container;
+                },
+                onRemove: function(map) {
+                    // Nada que hacer aquí
+                }
+            });
+
+            var coordinateDisplay = new CoordinateDisplayControl({position: 'bottomleft'}).addTo(map);
+            var latLonDisplay = document.getElementById('latLonDisplay');
+            var utmDisplay = document.getElementById('utmDisplay');
+
+            map.on('mousemove', function(e) {
+                var lat = e.latlng.lat.toFixed(6);
+                var lon = e.latlng.lng.toFixed(6);
+                latLonDisplay.innerHTML = `Lat: ${lat} Lon: ${lon}`;
+
+                // Conversión a UTM
+                // La librería Leaflet.UTM calcula la zona automáticamente.
+                // Para el Huso 18 Sur, necesitamos verificar que la conversión caiga en esa zona.
+                // Si el punto está en Chile, lo más probable es que esté en el huso 18 o 19, banda S, T, etc.
+                var utmCoords = e.latlng.utm(); // Calcula UTM automáticamente
+
+                if (utmCoords) {
+                    var easting = utmCoords.x.toFixed(2);
+                    var northing = utmCoords.y.toFixed(2);
+                    var zone = utmCoords.zone;
+                    var band = utmCoords.band; // Letra de la banda (ej. S, T, U)
+                    var hemisphere = utmCoords.hemisphere; // 'N' o 'S'
+
+                    utmDisplay.innerHTML = `UTM: ${easting} E ${northing} N (${zone}${band} ${hemisphere === 'S' ? 'Sur' : 'Norte'})`;
+                } else {
+                    utmDisplay.innerHTML = `UTM: No disponible`;
+                }
+            });
+
+            // Para limpiar las coordenadas cuando el mouse sale del mapa
+            map.on('mouseout', function() {
+                latLonDisplay.innerHTML = `Lat: --.-- Lon: --.--`;
+                utmDisplay.innerHTML = `UTM: -- E -- N (---)`;
+            });
+
         </script>
     </body>
 </html>
