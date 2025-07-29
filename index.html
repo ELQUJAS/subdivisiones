@@ -161,7 +161,7 @@
                 width: 100px; /* Ancho fijo para las etiquetas de th */
             }
 
-            /* Estilos para el nuevo visualizador de coordenadas combinado */
+            /* Estilos para el visualizador de coordenadas (solo Lat/Lon) */
             .coordinate-display.leaflet-control {
                 background: rgba(255, 255, 255, 0.9);
                 padding: 8px 10px;
@@ -170,15 +170,13 @@
                 font-family: Arial, sans-serif;
                 font-size: 0.9em;
                 color: #333;
-                min-width: 240px; /* Ancho suficiente para ambas coordenadas */
-                text-align: left; /* Alineado a la izquierda para mejor lectura */
+                min-width: 180px; /* Ancho suficiente */
+                text-align: center; /* Centrado para una sola línea */
                 z-index: 1000;
             }
-            .coordinate-display div {
-                margin-bottom: 3px; /* Espacio entre las líneas de coordenadas */
-            }
-            .coordinate-display div:last-child {
-                margin-bottom: 0;
+            /* Ocultar el círculo rojo por defecto de leaflet-search */
+            .leaflet-marker-icon.search-marker {
+                display: none !important;
             }
 
         </style>
@@ -200,7 +198,6 @@
         <script src="js/labels.js"></script>
         <script src="js/leaflet.photon.js"></script>
         <script src="js/leaflet-search.js"></script>
-        <script src="js/leaflet.utm.min.js"></script> 
         <script src="data/Subdivisiones20232024_2.js"></script>
         <script>
             var map = L.map('map', {
@@ -358,9 +355,9 @@
 
             // Variables globales para almacenar los marcadores temporales
             var coordSearchMarker = null;
-            var rolSearchMarker = null; // Nuevo marcador para la búsqueda de ROL
+            var rolSearchMarker = null; // Marcador específico para la búsqueda de ROL
 
-            // Función para limpiar cualquier marcador temporal activo
+            // Función para limpiar cualquier marcador temporal activo (incluido el de búsqueda de coordenadas)
             function cleanUpTemporaryMarkers() {
                 if (coordSearchMarker) {
                     map.removeLayer(coordSearchMarker);
@@ -376,7 +373,7 @@
                         layer.closePopup();
                     }
                 });
-                map.off('click', cleanUpTemporaryMarkers);
+                map.off('click', cleanUpTemporaryMarkers); // Desactivar el listener click para limpiar
             }
 
             // --- Buscador de Coordenadas: Ahora se crea dinámicamente como un control personalizado ---
@@ -425,7 +422,9 @@
                 hideMarkerOnCollapse: true, 
                 propertyName: 'rol',
                 textPlaceholder: 'Buscar ROL...',
-                collapsed: true
+                collapsed: true,
+                // Quita el marcador por defecto de la librería Leaflet-Search
+                marker: false // Importante: desactiva el marcador por defecto
             });
             map.addControl(searchControl);
 
@@ -437,27 +436,36 @@
                 var centroid = layerFound.getBounds().getCenter(); // Obtiene el centroide de la subdivisión
                 var rolValue = layerFound.feature.properties['rol']; // Obtiene el valor del ROL
 
+                // Genera un nuevo marcador con el icono por defecto de Leaflet
                 rolSearchMarker = L.marker(centroid).addTo(map)
                     .bindPopup('<b>ROL:</b> ' + (rolValue !== null ? autolinker.link(String(rolValue).replace(/'/g, '\'').toLocaleString()) : 'No disponible'))
                     .openPopup();
 
-                map.setView(centroid, 15); 
+                // Hace zoom al marcador (y por lo tanto al centroide del polígono)
+                map.setView(centroid, 15); // Nivel de zoom 15, puedes ajustarlo si lo deseas
                 
+                // Abre el popup del polígono encontrado, si es necesario
                 layerFound.openPopup();
 
+                // Añadir un listener al mapa para limpiar los marcadores al hacer click fuera
                 map.on('click', cleanUpTemporaryMarkers);
+
+                // También limpia los marcadores si se cierra el popup del marcador de búsqueda
                 rolSearchMarker.on('popupclose', function() {
                     cleanUpTemporaryMarkers();
                 });
+                // Y si se cierra el popup del polígono
                 layerFound.on('popupclose', function() { 
                     cleanUpTemporaryMarkers();
                 });
             });
 
+            // Listener para cuando la búsqueda de rol se colapsa (manual o automáticamente)
             map.on('search:collapsed', function(e) {
-                cleanUpTemporaryMarkers();
+                cleanUpTemporaryMarkers(); // Limpia los marcadores cuando el buscador se "cierra"
             });
 
+            // Añadir el icono de binoculares al botón de búsqueda
             document.querySelectorAll('.leaflet-control-search .search-button').forEach(button => {
                 if (!button.classList.contains('fa-binoculars')) {
                     button.classList.add('fa', 'fa-binoculars');
@@ -475,7 +483,7 @@
                 resetLabels([layer_Subdivisiones20232024_2]);
             });
 
-            // JavaScript para la funcionalidad del buscador de coordenadas
+            // JavaScript para la funcionalidad del buscador de coordenadas manual
             buscarBoton.addEventListener('click', function() {
                 cleanUpTemporaryMarkers(); 
 
@@ -500,8 +508,9 @@
                 map.setView([lat, lng], 15);
 
                 coordSearchMarker = L.marker([lat, lng]).addTo(map);
-                const formattedLat = lat.toFixed(4);
-                const formattedLng = lng.toFixed(4);
+                // --- CAMBIO AQUÍ: formattedLat y formattedLng ahora usan toFixed(6) ---
+                const formattedLat = lat.toFixed(6); 
+                const formattedLng = lng.toFixed(6);
                 coordSearchMarker.bindPopup(`<b>Coordenadas:</b><br>${formattedLat}, ${formattedLng}`).openPopup();
 
                 map.on('click', cleanUpTemporaryMarkers);
@@ -514,14 +523,12 @@
                 resultadoDiv.textContent = '';
             });
 
-            // --- Visualizador de coordenadas combinado (Lat/Lon y UTM) ---
-            var CoordinateDisplayControl = L.Control.extend({
+            // --- Visualizador de coordenadas Latitud/Longitud al mover el mouse ---
+            var MouseCoordinateDisplay = L.Control.extend({
                 onAdd: function(map) {
                     var container = L.DomUtil.create('div', 'coordinate-display leaflet-control');
-                    container.innerHTML = `
-                        <div id="latLonDisplay">Lat: --.-- Lon: --.--</div>
-                        <div id="utmDisplay">UTM: -- E -- N (---)</div>
-                    `;
+                    container.id = 'mouseCoordDisplay'; // Asigna un ID para facilitar la actualización
+                    container.innerHTML = `Lat: --.-- Lon: --.--`;
                     L.DomEvent.disableClickPropagation(container);
                     L.DomEvent.disableScrollPropagation(container);
                     return container;
@@ -531,38 +538,18 @@
                 }
             });
 
-            var coordinateDisplay = new CoordinateDisplayControl({position: 'bottomleft'}).addTo(map);
-            var latLonDisplay = document.getElementById('latLonDisplay');
-            var utmDisplay = document.getElementById('utmDisplay');
+            var mouseCoordinateDisplay = new MouseCoordinateDisplay({position: 'bottomleft'}).addTo(map);
+            var mouseCoordDisplayElement = document.getElementById('mouseCoordDisplay');
 
             map.on('mousemove', function(e) {
-                var lat = e.latlng.lat.toFixed(6);
+                var lat = e.latlng.lat.toFixed(6); // 6 decimales para mayor precisión
                 var lon = e.latlng.lng.toFixed(6);
-                latLonDisplay.innerHTML = `Lat: ${lat} Lon: ${lon}`;
-
-                // Conversión a UTM
-                // La librería Leaflet.UTM calcula la zona automáticamente.
-                // Para el Huso 18 Sur, necesitamos verificar que la conversión caiga en esa zona.
-                // Si el punto está en Chile, lo más probable es que esté en el huso 18 o 19, banda S, T, etc.
-                var utmCoords = e.latlng.utm(); // Calcula UTM automáticamente
-
-                if (utmCoords) {
-                    var easting = utmCoords.x.toFixed(2);
-                    var northing = utmCoords.y.toFixed(2);
-                    var zone = utmCoords.zone;
-                    var band = utmCoords.band; // Letra de la banda (ej. S, T, U)
-                    var hemisphere = utmCoords.hemisphere; // 'N' o 'S'
-
-                    utmDisplay.innerHTML = `UTM: ${easting} E ${northing} N (${zone}${band} ${hemisphere === 'S' ? 'Sur' : 'Norte'})`;
-                } else {
-                    utmDisplay.innerHTML = `UTM: No disponible`;
-                }
+                mouseCoordDisplayElement.innerHTML = `Lat: ${lat} Lon: ${lon}`;
             });
 
-            // Para limpiar las coordenadas cuando el mouse sale del mapa
+            // Opcional: Para limpiar las coordenadas cuando el mouse sale del mapa
             map.on('mouseout', function() {
-                latLonDisplay.innerHTML = `Lat: --.-- Lon: --.--`;
-                utmDisplay.innerHTML = `UTM: -- E -- N (---)`;
+                mouseCoordDisplayElement.innerHTML = `Lat: --.-- Lon: --.--`;
             });
 
         </script>
