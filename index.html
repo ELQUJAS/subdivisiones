@@ -255,12 +255,14 @@
                 
                 // Función auxiliar para crear un desplegable
                 function createDetails(summaryText, contentValue) {
+                    // Solo crear el desplegable si el valor no es nulo ni vacío
                     if (contentValue === null || contentValue === '') {
-                        return ''; // No mostrar si el valor está vacío
+                        return '';
                     }
                     return '<details><summary>' + summaryText + '</summary><p>' + autolinker.link(String(contentValue).replace(/'/g, '\'').toLocaleString()) + '</p></details>';
                 }
 
+                // Aplicar createDetails a TODAS las propiedades excepto 'rol'
                 popupContent += createDetails('ZONA PRI', feature.properties['ZONA PRI']);
                 popupContent += createDetails('ZONA/SECTOR', feature.properties['ZONA']);
                 popupContent += createDetails('ZOIT', feature.properties['ZOIT']);
@@ -274,6 +276,7 @@
                 popupContent += createDetails('SUPERFICIE (MT2)', feature.properties['SUPERFICIE']);
                 popupContent += createDetails('DESTINO', feature.properties['DESTINO']);
                 popupContent += createDetails('RECEPCIÓN', feature.properties['RECEPCIÓN']);
+                // Asegúrate de que todas las propiedades que quieras desplegar estén aquí
 
                 var content = removeEmptyRowsFromPopupContent(popupContent, feature);
                 layer.on('popupopen', function(e) {
