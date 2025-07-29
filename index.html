@@ -303,9 +303,8 @@
             lay.addTo(map);
             setBounds();
 
-            // Variable global para almacenar el marcador de búsqueda de coordenadas
+            // Variables globales para almacenar los marcadores temporales
             var coordSearchMarker = null;
-            // Variable global para almacenar el marcador de búsqueda de rol
             var rolSearchMarker = null;
 
             // Función para limpiar cualquier marcador temporal activo
@@ -340,16 +339,17 @@
                 var latlng = e.latlng;
                 var rolInfo = e.layer.feature.properties.rol;
 
-                // Crear un icono personalizado si deseas algo diferente al marcador por defecto
+                // Puedes personalizar el icono del marcador si lo deseas
                 // var customIcon = L.icon({
-                //     iconUrl: 'ruta/a/tu/icono.png',
-                //     iconSize: [38, 38], // tamaño del icono
-                //     iconAnchor: [19, 38], // punto del icono que corresponde a la latlng del marcador
-                //     popupAnchor: [0, -30] // punto donde el popup se "ancla" al icono
+                //     iconUrl: 'ruta/a/tu/icono.png', // Reemplaza con la ruta a tu imagen de icono
+                //     iconSize: [38, 38],
+                //     iconAnchor: [19, 38],
+                //     popupAnchor: [0, -30]
                 // });
                 // rolSearchMarker = L.marker(latlng, {icon: customIcon}).addTo(map);
 
-                rolSearchMarker = L.marker(latlng).addTo(map); // Usar el marcador por defecto
+                // Usamos el marcador por defecto de Leaflet
+                rolSearchMarker = L.marker(latlng).addTo(map);
                 rolSearchMarker.bindPopup(`<b>Rol Encontrado:</b><br>${rolInfo}`).openPopup();
 
                 map.setView(latlng, 17); // Centrar y hacer zoom en la ubicación del rol
@@ -357,7 +357,7 @@
                 // Activar el listener para limpiar el marcador al hacer clic en el mapa
                 map.on('click', cleanUpTemporaryMarkers);
 
-                // Opcional: Asegurarse de que el marcador desaparezca si se cierra su popup manualmente
+                // Asegurarse de que el marcador desaparezca si se cierra su popup manualmente
                 rolSearchMarker.on('popupclose', function() {
                     cleanUpTemporaryMarkers();
                 });
@@ -365,12 +365,11 @@
 
             // Listener para cuando la búsqueda de rol no encuentra nada
             map.on('search:collapsed', function(e) {
-                // No es necesario limpiar aquí si no se creó un marcador
-                // Si hideMarkerOnCollapse es true, Leaflet ya limpia su marcador interno.
-                // Nuestra lógica de cleanUpTemporaryMarkers se encarga de los nuestros.
+                // Leaflet's search control will handle its own marker hiding if hideMarkerOnCollapse is true.
+                // Our `cleanUpTemporaryMarkers` ensures our custom markers are removed.
             });
 
-
+            // Asigna los iconos de binoculares a los botones de búsqueda (esto es parte de qgis2web)
             if (typeof url === 'undefined') {
                 document.getElementsByClassName('search-button')[0].className += ' fa fa-binoculars';
             } else {
@@ -394,10 +393,10 @@
                 const resultadoDiv = document.getElementById('resultadoBusqueda');
 
                 buscarBoton.addEventListener('click', function() {
+                    cleanUpTemporaryMarkers(); // Limpia cualquier marcador existente antes de una nueva búsqueda de coordenadas.
+
                     const inputValue = coordenadasInput.value.trim();
                     const parts = inputValue.split(/\s+/);
-
-                    cleanUpTemporaryMarkers(); // Limpia cualquier marcador existente al iniciar una nueva búsqueda de coord.
 
                     if (parts.length !== 2) {
                         resultadoDiv.textContent = 'Formato incorrecto. Ingresa Latitud y Longitud separadas por un espacio (ej: -39.28 -72.24).';
@@ -412,7 +411,7 @@
                         return;
                     }
 
-                    const tolerancia = 0.005;
+                    const tolerancia = 0.005; // Margen para encontrar subdivisiones cercanas
 
                     let encontrado = false;
                     layer_Subdivisiones20232024_2.eachLayer(function (layer) {
@@ -427,7 +426,7 @@
                             layer.openPopup();
                             resultadoDiv.textContent = 'Subdivisión cercana encontrada. Centrando el mapa.';
                             encontrado = true;
-                            return;
+                            return; // Salir del bucle una vez encontrada
                         }
                     });
 
@@ -441,7 +440,7 @@
                         // Activar el listener para limpiar el marcador al hacer clic en el mapa
                         map.on('click', cleanUpTemporaryMarkers);
 
-                        // Opcional: Asegurarse de que el marcador desaparezca si se cierra su popup manualmente
+                        // Asegurarse de que el marcador desaparezca si se cierra su popup manualmente
                         coordSearchMarker.on('popupclose', function() {
                             cleanUpTemporaryMarkers();
                         });
