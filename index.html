@@ -21,18 +21,18 @@
             }
             /* Estilos para el buscador de coordenadas */
             .coordenadas-buscador.leaflet-control {
-                padding: 10px; /* Aumentado el padding para hacerlo más grande */
+                padding: 10px;
                 background-color: rgba(255, 255, 255, 0.9);
                 border-radius: 5px;
                 box-shadow: 0 2px 8px rgba(0,0,0,0.15);
                 z-index: 1000;
-                width: 250px; /* Ancho aumentado */
+                width: 250px;
                 font-family: Arial, sans-serif;
                 color: #333;
                 box-sizing: border-box;
                 display: flex;
-                flex-direction: column; /* Cambiado a columna para apilar input y botón */
-                align-items: flex-start; /* Alinea los elementos a la izquierda */
+                flex-direction: column;
+                align-items: flex-start;
             }
 
             .coordenadas-buscador span {
@@ -40,13 +40,13 @@
             }
 
             .coordenadas-buscador input {
-                width: 100%; /* El input ocupa todo el ancho disponible */
-                padding: 8px 12px; /* Padding ajustado */
-                margin-bottom: 8px; /* Espacio debajo del input */
+                width: 100%;
+                padding: 8px 12px;
+                margin-bottom: 8px;
                 border: 1px solid #ccc;
                 border-radius: 3px;
                 box-sizing: border-box;
-                font-size: 0.95em; /* Fuente ligeramente más grande */
+                font-size: 0.95em;
                 color: #333;
                 transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
             }
@@ -63,14 +63,14 @@
             }
 
             .coordenadas-buscador button {
-                width: 100%; /* El botón ocupa todo el ancho disponible */
-                padding: 8px 12px; /* Padding ajustado */
+                width: 100%;
+                padding: 8px 12px;
                 background-color: #007bff;
                 color: white;
                 border: none;
                 border-radius: 3px;
                 cursor: pointer;
-                font-size: 0.95em; /* Fuente ligeramente más grande */
+                font-size: 0.95em;
                 font-weight: normal;
                 transition: background-color 0.2s ease-in-out;
             }
@@ -84,19 +84,19 @@
             }
 
             #resultadoBusqueda {
-                font-size: 0.8em; /* Texto de resultado un poco más grande */
+                font-size: 0.8em;
                 margin-top: 5px;
                 color: #dc3545;
                 font-weight: normal;
                 text-align: center;
-                width: 100%; /* Ocupa todo el ancho del contenedor */
+                width: 100%;
             }
 
             /* Estilos para el control de capas (leyenda) */
             .leaflet-control-layers {
                 z-index: 1000;
                 position: absolute;
-                top: 10px; /* Se mantiene en la parte superior derecha */
+                top: 10px;
                 right: 10px;
                 left: unset;
             }
@@ -286,20 +286,7 @@
                     fillColor: 'rgba(232,113,141,0.0)',
                     interactive: true,
                 }
-            }
-            map.createPane('pane_Subdivisiones20232024_2');
-            map.getPane('pane_Subdivisiones20232024_2').style.zIndex = 402;
-            map.getPane('pane_Subdivisiones20232024_2').style['mix-blend-mode'] = 'normal';
-            var layer_Subdivisiones20232024_2 = new L.geoJson(json_Subdivisiones20232024_2, {
-                attribution: '',
-                interactive: true,
-                dataVar: 'json_Subdivisiones20232024_2',
-                layerName: 'layer_Subdivisiones20232024_2',
-                pane: 'pane_Subdivisiones20232024_2',
-                onEachFeature: pop_Subdivisiones20232024_2,
-                style: style_Subdivisiones20232024_2_0,
-            });
-            bounds_group.addLayer(layer_Subdivisiones20232024_2);
+            _group.addLayer(layer_Subdivisiones20232024_2);
             map.addLayer(layer_Subdivisiones20232024_2);
 
             // --- Configuración del control de capas (leyenda) ---
@@ -332,7 +319,8 @@
 
             // Variables globales para almacenar los marcadores temporales
             var coordSearchMarker = null;
-            var rolSearchMarker = null;
+            // No necesitamos un rolSearchMarker ya que haremos zoom directamente en la subdivisión
+            // var rolSearchMarker = null; // Eliminado
 
             // Función para limpiar cualquier marcador temporal activo
             function cleanUpTemporaryMarkers() {
@@ -340,13 +328,13 @@
                     map.removeLayer(coordSearchMarker);
                     coordSearchMarker = null;
                 }
-                if (rolSearchMarker) {
-                    map.removeLayer(rolSearchMarker);
-                    rolSearchMarker = null;
-                }
-                if (!coordSearchMarker && !rolSearchMarker) {
-                    map.off('click', cleanUpTemporaryMarkers);
-                }
+                // Si la capa de subdivisiones tenía un popup abierto por una búsqueda previa, ciérralo.
+                layer_Subdivisiones20232024_2.eachLayer(function(layer) {
+                    if (layer.isPopupOpen()) {
+                        layer.closePopup();
+                    }
+                });
+                map.off('click', cleanUpTemporaryMarkers);
             }
 
             // --- Buscador de Coordenadas: Ahora se crea dinámicamente como un control personalizado ---
@@ -359,139 +347,72 @@
                         <div id="resultadoBusqueda"></div>
                     `;
 
-                    // Evitar la propagación de eventos para que el mapa no se arrastre
                     L.DomEvent.disableClickPropagation(container);
                     L.DomEvent.disableScrollPropagation(container);
 
                     return container;
                 },
-                onRemove: function(map) {
-                    // Limpieza opcional
-                }
+                onRemove: function(map) { }
             });
 
             // Añadir el control de coordenadas DEPUES de la leyenda en la misma posición 'topright'
-            // para que Leaflet los apile automáticamente.
             var coordsSearchControlInstance = new CoordsSearchControl({position: 'topright'}).addTo(map);
 
-            // Ahora podemos acceder a los elementos del DOM dentro del control
             const coordenadasInput = coordsSearchControlInstance.getContainer().querySelector('#coordenadasInput');
             const buscarBoton = coordsSearchControlInstance.getContainer().querySelector('#buscarCoordenadas');
             const resultadoDiv = coordsSearchControlInstance.getContainer().querySelector('#resultadoBusqueda');
 
             // --- Posicionar el buscador de coordenadas más abajo ---
-            // Una vez que el control se ha añadido y renderizado, ajustamos su 'top'
-            // Esto se hace con un pequeño retraso para asegurar que el DOM esté listo.
+            // Usamos un retraso para asegurar que los elementos estén renderizados y sus dimensiones sean correctas.
             setTimeout(function() {
                 const legendControl = document.querySelector('.leaflet-control-layers');
                 const coordSearchControlElement = coordsSearchControlInstance.getContainer();
 
                 if (legendControl && coordSearchControlElement) {
-                    // Obtener la posición inferior de la leyenda
-                    const legendBottom = legendControl.getBoundingClientRect().bottom;
-                    // Obtener la posición superior del mapa para calcular un 'top' relativo
-                    const mapTop = map.getContainer().getBoundingClientRect().top;
-
-                    // Establecer el 'top' del buscador de coordenadas
-                    // Sumamos un margen (ej. 20px) al final de la leyenda
-                    coordSearchControlElement.style.top = (legendBottom - mapTop + 20) + 'px';
+                    const legendRect = legendControl.getBoundingClientRect();
+                    const mapRect = map.getContainer().getBoundingClientRect();
+                    
+                    // Posiciona el buscador de coordenadas justo debajo de la leyenda, con un margen
+                    coordSearchControlElement.style.top = (legendRect.bottom - mapRect.top + 20) + 'px';
+                    coordSearchControlElement.style.right = '10px'; // Alinear con el lado derecho de la leyenda
                 }
-            }, 100); // Pequeño retraso para asegurar que los elementos estén renderizados
+            }, 500); // Aumentado el retraso a 500ms para mayor seguridad
 
             // --- Configuración del control de búsqueda de roles ---
+            // Importante: quitamos la propiedad `marker` para que Leaflet.Search no añada el círculo automáticamente.
             var searchControl = new L.Control.Search({
                 layer: layer_Subdivisiones20232024_2,
                 initial: false,
-                hideMarkerOnCollapse: true,
+                hideMarkerOnCollapse: true, // Esto no tendrá efecto si no hay marcador predefinido
                 propertyName: 'rol',
-                marker: {
-                    // El marcador de búsqueda no necesita un icono específico aquí,
-                    // lo manejamos en search:locationfound
-                }
+                textPlaceholder: 'Buscar ROL...', // Texto de placeholder más descriptivo
+                collapsed: true // Mantener el buscador de roles colapsado por defecto
             });
             map.addControl(searchControl);
 
             // Listener para cuando se encuentra una ubicación por Rol
             map.on('search:locationfound', function(e) {
-                cleanUpTemporaryMarkers();
+                cleanUpTemporaryMarkers(); // Limpia el marcador de coordenadas si existe
 
-                var latlng = e.latlng;
-                var feature = e.layer.feature; // Obtiene la característica completa
+                var layerFound = e.layer; // Esta es la capa GeoJSON de la subdivisión encontrada
+                
+                // Hace zoom a los límites de la subdivisión encontrada
+                map.fitBounds(layerFound.getBounds());
+                
+                // Abre el popup de la subdivisión encontrada
+                layerFound.openPopup();
 
-                rolSearchMarker = L.marker(latlng).addTo(map);
-
-                // Generar el contenido del popup directamente para el marcador temporal
-                var popupContent = '<table>\
-                            <tr>\
-                                <th scope="row">ROL : </th>\
-                                <td>' + (feature.properties['rol'] !== null ? autolinker.link(String(feature.properties['rol']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                            </tr>\
-                            <tr>\
-                                <th scope="row">ZONA PRI : </th>\
-                                <td>' + (feature.properties['ZONA PRI'] !== null ? autolinker.link(String(feature.properties['ZONA PRI']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                            </tr>\
-                            <tr>\
-                                <th scope="row">ZONA/SECTOR : </th>\
-                                <td>' + (feature.properties['ZONA'] !== null ? autolinker.link(String(feature.properties['ZONA']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                            </tr>\
-                            <tr>\
-                                <th scope="row">ZOIT : </th>\
-                                <td>' + (feature.properties['ZOIT'] !== null ? autolinker.link(String(feature.properties['ZOIT']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                            </tr>\
-                            <tr>\
-                                <th scope="row">ESTADO LAGO : </th>\
-                                <td>' + (feature.properties['ESTADO LAG'] !== null ? autolinker.link(String(feature.properties['ESTADO LAG']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                            </tr>\
-                            <tr>\
-                                <th scope="row">COMUNIDAD INDÍGENA : </th>\
-                                <td>' + (feature.properties['COMUNIDAD'] !== null ? autolinker.link(String(feature.properties['COMUNIDAD']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                            </tr>\
-                            <tr>\
-                                <th scope="row">CONSTRUCCIONES : </th>\
-                                <td>' + (feature.properties['CONSTRUC.'] !== null ? autolinker.link(String(feature.properties['CONSTRUC.']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                            </tr>\
-                            <tr>\
-                                <th scope="row">APROBACIÓN : </th>\
-                                <td>' + (feature.properties['APROBACIÓ'] !== null ? autolinker.link(String(feature.properties['APROBACIÓ']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                            </tr>\
-                            <tr>\
-                                <th scope="row">FECHA : </th>\
-                                <td>' + (feature.properties['FECHA'] !== null ? autolinker.link(String(feature.properties['FECHA']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                            </tr>\
-                            <tr>\
-                                <th scope="row">UBICACIÓN : </th>\
-                                <td>' + (feature.properties['UBICACIÓN'] !== null ? autolinker.link(String(feature.properties['UBICACIÓN']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                            </tr>\
-                            <tr>\
-                                <th scope="row">PROPIETARIO : </th>\
-                                <td>' + (feature.properties['PROPIETARI'] !== null ? autolinker.link(String(feature.properties['PROPIETARI']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                            </tr>\
-                            <tr>\
-                                <th scope="row">SUPERFICIE (MT2) : </th>\
-                                <td>' + (feature.properties['SUPERFICIE'] !== null ? autolinker.link(String(feature.properties['SUPERFICIE']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                            </tr>\
-                            <tr>\
-                                <th scope="row">DESTINO : </th>\
-                                <td>' + (feature.properties['DESTINO'] !== null ? autolinker.link(String(feature.properties['DESTINO']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                            </tr>\
-                            <tr>\
-                                <th scope="row">RECEPCIÓN : </th>\
-                                <td>' + (feature.properties['RECEPCIÓN'] !== null ? autolinker.link(String(feature.properties['RECEPCIÓN']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                            </tr>\
-                        </table>';
-                var content = removeEmptyRowsFromPopupContent(popupContent, feature);
-                rolSearchMarker.bindPopup(content, { maxHeight: 400 });
-                rolSearchMarker.openPopup();
-
-                map.setView(latlng, 17);
-
+                // Para asegurar que el popup se cierre si el usuario hace clic en otro lado
                 map.on('click', cleanUpTemporaryMarkers);
-                rolSearchMarker.on('popupclose', function() {
+                layerFound.on('popupclose', function() {
                     cleanUpTemporaryMarkers();
                 });
             });
 
-            map.on('search:collapsed', function(e) { });
+            map.on('search:collapsed', function(e) {
+                // Opcional: Si el buscador de roles se colapsa, limpiamos cualquier popup abierto por él.
+                cleanUpTemporaryMarkers();
+            });
 
             // qgis2web assigns search button icons. Ensure they are correctly assigned.
             document.querySelectorAll('.leaflet-control-search .search-button').forEach(button => {
@@ -513,7 +434,7 @@
 
             // JavaScript para la funcionalidad del buscador de coordenadas
             buscarBoton.addEventListener('click', function() {
-                cleanUpTemporaryMarkers();
+                cleanUpTemporaryMarkers(); // Limpia cualquier popup de rol o marcador de coordenadas anterior
 
                 const inputValue = coordenadasInput.value.trim();
                 const parts = inputValue.split(/\s+/);
