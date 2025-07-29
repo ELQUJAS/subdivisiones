@@ -118,6 +118,35 @@
                 left: unset;
             }
 
+            /* Estilo para el botón de búsqueda de ROL (para mostrar solo el icono) */
+            .leaflet-control-search .search-button {
+                font-size: 1.2em; /* Ajusta el tamaño del icono si es necesario */
+                line-height: 26px; /* Para centrar verticalmente el icono */
+                text-align: center;
+                width: 30px; /* Ancho del botón */
+                height: 30px; /* Alto del botón */
+                padding: 0;
+                overflow: hidden; /* Oculta cualquier texto que se desborde */
+                display: flex; /* Para centrar el ícono */
+                justify-content: center; /* Centrado horizontal */
+                align-items: center; /* Centrado vertical */
+                background-color: #fff; /* Fondo del botón, puedes cambiarlo */
+                color: #333; /* Color del icono, puedes cambiarlo */
+            }
+
+            .leaflet-control-search .search-button::before {
+                /* Esto es para asegurar que el icono de Font Awesome se muestre correctamente */
+                display: block;
+                font-family: "Font Awesome 5 Free"; /* O la familia de tu versión de Font Awesome */
+                font-weight: 900; /* Para iconos solid (fas) */
+                content: "\f1e5"; /* Código Unicode para el icono de binoculares (fa-binoculars) */
+            }
+
+            /* Ocultar el texto dentro del botón si leaflet-search añade texto */
+            .leaflet-control-search .search-button span {
+                display: none;
+            }
+
             /* --- Estilos para los desplegables en el popup (Opción 2) --- */
             .leaflet-popup-content details {
                 margin-bottom: 5px; /* Espacio entre los desplegables */
@@ -177,6 +206,21 @@
             /* Ocultar el círculo rojo por defecto de leaflet-search */
             .leaflet-marker-icon.search-marker {
                 display: none !important;
+            }
+
+            /* NUEVO ESTILO: Para el contenedor del icono personalizado del buscador de ROL */
+            .custom-search-marker {
+                background: none; /* Asegura que no haya fondo blanco del divIcon */
+                border: none; /* Sin borde */
+                box-shadow: none; /* Sin sombra */
+                display: flex; /* Para centrar el icono dentro del div */
+                justify-content: center;
+                align-items: center;
+            }
+
+            /* Opcional: Ajustes para el icono de Font Awesome si no se ve bien */
+            .custom-search-marker i {
+                text-shadow: 1px 1px 2px rgba(0,0,0,0.5); /* Agrega una pequeña sombra para que se destaque */
             }
 
         </style>
@@ -419,9 +463,9 @@
             var searchControl = new L.Control.Search({
                 layer: layer_Subdivisiones20232024_2,
                 initial: false,
-                hideMarkerOnCollapse: true, 
+                hideMarkerOnCollapse: true,
                 propertyName: 'rol',
-                textPlaceholder: 'Buscar ROL...',
+                // textPlaceholder: 'Buscar ROL...', // Comentado para que solo se vea el icono del botón
                 collapsed: true,
                 marker: false // Importante: desactiva el marcador por defecto de leaflet-search
             });
@@ -435,9 +479,22 @@
                 var centroid = layerFound.getBounds().getCenter(); // Obtiene el centroide de la subdivisión
                 var rolValue = layerFound.feature.properties['rol']; // Obtiene el valor del ROL
 
-                // *** CÓDIGO CLAVE PARA AÑADIR EL MARCADOR AL BUSCADOR DE ROL ***
-                // Crea un nuevo marcador de Leaflet estándar (el pin azul)
-                rolSearchMarker = L.marker(centroid).addTo(map)
+                // *** CÓDIGO CLAVE PARA AÑADIR EL MARCADOR CON SÍMBOLO PERSONALIZADO AL BUSCADOR DE ROL ***
+                // Crea un icono personalizado con Font Awesome
+                var customRolIcon = L.divIcon({
+                    className: 'custom-search-marker', // Clase CSS para estilizar el contenedor del icono
+                    // Aquí puedes cambiar el icono y su color:
+                    html: '<i class="fas fa-map-marker-alt fa-2x" style="color: #007bff;"></i>', // Icono de pin de mapa azul (ejemplo)
+                    // Otros ejemplos:
+                    // html: '<i class="fas fa-eye fa-2x" style="color: #28a745;"></i>', // Un ojo verde
+                    // html: '<i class="fas fa-home fa-2x" style="color: #ffc107;"></i>', // Una casa amarilla
+                    // html: '<i class="fas fa-search-location fa-2x" style="color: purple;"></i>', // Lupa con ubicación morada
+                    iconSize: [30, 42], // Ajusta el tamaño del contenedor del icono [width, height]
+                    iconAnchor: [15, 42] // Punto donde "ancla" el icono al punto de la coordenada (la punta del pin)
+                });
+
+                // Crea el marcador de Leaflet usando el icono personalizado
+                rolSearchMarker = L.marker(centroid, { icon: customRolIcon }).addTo(map)
                     .bindPopup('<b>ROL:</b> ' + (rolValue !== null ? autolinker.link(String(rolValue).replace(/'/g, '\'').toLocaleString()) : 'No disponible'))
                     .openPopup(); // Abre el popup del marcador
 
@@ -465,12 +522,15 @@
                 cleanUpTemporaryMarkers(); // Limpia los marcadores cuando el buscador se "cierra"
             });
 
-            // Añadir el icono de binoculares al botón de búsqueda
-            document.querySelectorAll('.leaflet-control-search .search-button').forEach(button => {
-                if (!button.classList.contains('fa-binoculars')) {
-                    button.classList.add('fa', 'fa-binoculars');
-                }
-            });
+            // Añadir el icono de binoculares al botón de búsqueda (ahora se controla por CSS ::before)
+            // Este bloque de código ahora es redundante para el icono del botón de búsqueda
+            // si estás usando el método CSS ::before, pero lo mantengo por si lo necesitas
+            // para otras finalidades o una versión diferente de Font Awesome.
+            // document.querySelectorAll('.leaflet-control-search .search-button').forEach(button => {
+            //     if (!button.classList.contains('fa-binoculars')) {
+            //         button.classList.add('fa', 'fa-binoculars');
+            //     }
+            // });
 
             resetLabels([layer_Subdivisiones20232024_2]);
             map.on("zoomend", function(){
