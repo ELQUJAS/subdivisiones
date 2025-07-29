@@ -456,8 +456,8 @@
             var coordSearchMarker = null;
             var rolSearchMarker = null; // Marcador para la búsqueda de rol
 
-            // FEATURE_GLOBAL_POPUP_REF: Una referencia al popup de la característica de la capa, si está abierto por la búsqueda de ROL
-            var featureGlobalPopupRef = null;
+            // FEATURE_GLOBAL_POPUP_REF: Una referencia a la capa (feature) cuyo popup se abrió por la búsqueda de ROL
+            var lastFoundRolFeature = null;
 
             // Función para limpiar cualquier marcador temporal activo y popups
             function cleanUpTemporaryMarkers() {
@@ -469,19 +469,20 @@
                     map.removeLayer(rolSearchMarker);
                     rolSearchMarker = null;
                 }
-                // Cierra explícitamente el popup de la característica si fue abierto por la búsqueda de ROL
-                if (featureGlobalPopupRef && featureGlobalPopupRef.isPopupOpen()) {
-                    featureGlobalPopupRef.closePopup();
-                    featureGlobalPopupRef = null; // Limpia la referencia
+                
+                // Si la última característica ROL encontrada tiene un popup abierto, ciérralo
+                if (lastFoundRolFeature && lastFoundRolFeature.isPopupOpen()) {
+                    lastFoundRolFeature.closePopup();
                 }
+                lastFoundRolFeature = null; // Limpiar la referencia
 
-                // Asegúrate de que no haya otros popups abiertos de forma "fantasma"
-                map.closePopup(); // Cierra cualquier popup abierto en el mapa
+                // Asegúrate de cerrar CUALQUIER popup que Leaflet pueda tener abierto
+                // Esto es más agresivo y debería prevenir popups "fantasma"
+                map.closePopup(); 
 
-                map.off('click', cleanUpTemporaryMarkers); // Desactivar el listener click para limpiar
                 hideRolSuggestions(); // Ocultar sugerencias de ROL al limpiar
             }
-
+            
             // --- Buscador de Coordenadas: Ahora se crea dinámicamente como un control personalizado ---
             var CoordsSearchControl = L.Control.extend({
                 onAdd: function(map) {
@@ -561,7 +562,7 @@
                 const formattedLng = lng.toFixed(6);
                 coordSearchMarker.bindPopup(`<b>Coordenadas:</b><br>${formattedLat}, ${formattedLng}`).openPopup();
 
-                map.on('click', cleanUpTemporaryMarkers);
+                // Aquí, el listener 'popupclose' del marcador de búsqueda será suficiente para limpiar
                 coordSearchMarker.on('popupclose', function() {
                     cleanUpTemporaryMarkers();
                 });
@@ -610,6 +611,7 @@
                         <div id="resultadoBusquedaRol"></div>
                         <div id="rolSugerencias"></div> `;
 
+                    // Importante: No propagar clics ni scroll dentro del control para que no afecte el mapa
                     L.DomEvent.disableClickPropagation(container);
                     L.DomEvent.disableScrollPropagation(container);
 
@@ -687,6 +689,7 @@
                         suggestionItem.addEventListener('click', function() {
                             rolInput.value = rol; // Rellenar el input con la sugerencia
                             hideRolSuggestions(); // Ocultar sugerencias
+                            // *** AQUÍ ESTÁ EL CAMBIO CRUCIAL ***
                             buscarRolBoton.click(); // Disparar la búsqueda
                         });
                         rolSugerenciasDiv.appendChild(suggestionItem);
@@ -697,24 +700,19 @@
                 }
             });
 
-            // Ocultar sugerencias cuando se hace clic fuera del buscador de rol
+            // Ocultar sugerencias cuando se hace clic fuera del buscador de rol O DEL MAPA EN GENERAL
             map.on('click', function(e) {
-                // Verificar si el clic fue dentro del contenedor del buscador de ROL.
-                // Si no fue dentro, ocultar las sugerencias.
+                // Si el clic no fue dentro del control del buscador de ROL, ocultar sugerencias.
                 if (!rolSearchControlInstance.getContainer().contains(e.originalEvent.target)) {
                     hideRolSuggestions();
                 }
-                // Si el clic no fue para limpiar el mapa después de una búsqueda de ROL o coordenada,
-                // y no hay popups abiertos por la búsqueda de ROL, entonces no limpies.
-                // Esto permite que los popups normales de la capa funcionen.
-                if (e.originalEvent.target !== map.getContainer() && map.getPopup() && map.getPopup()._source !== rolSearchMarker && featureGlobalPopupRef !== map.getPopup()._source) {
-                    // Si el popup abierto no es el de nuestro marcador de búsqueda o el de la feature encontrada,
-                    // significa que es un popup normal de la capa, así que no lo cierres con cleanUpTemporaryMarkers.
-                    return; 
+                // Si el clic es en cualquier parte del mapa que no sea un popup abierto,
+                // limpiar los marcadores temporales y popups de búsqueda.
+                // Esto permite que los popups normales de las features funcionen al clic.
+                if (!map.hasLayer(rolSearchMarker) && !map.getPopup()) { 
+                    cleanUpTemporaryMarkers();
                 }
-                cleanUpTemporaryMarkers();
             });
-
 
             // También ocultar si se pierde el foco del input y no es el contenedor de sugerencias
             rolInput.addEventListener('blur', function() {
@@ -727,7 +725,7 @@
 
 
             buscarRolBoton.addEventListener('click', function() {
-                cleanUpTemporaryMarkers(); // Limpiar marcadores existentes
+                cleanUpTemporaryMarkers(); // Limpiar marcadores y popups ANTES de una nueva búsqueda
 
                 const rolValue = rolInput.value.trim();
                 resultadoRolDiv.textContent = '';
@@ -740,7 +738,7 @@
 
                 let foundFeature = null;
                 layer_Subdivisiones20232024_2.eachLayer(function(layer) {
-                    // Normalize both values for robust comparison
+                    // Normalizar ambos valores para una comparación robusta
                     if (layer.feature && layer.feature.properties && String(layer.feature.properties['rol']).trim().toLowerCase() === rolValue.toLowerCase()) {
                         foundFeature = layer;
                         return; // Salir del bucle una vez encontrado
@@ -753,27 +751,27 @@
 
                     // Añadir el marcador personalizado
                     rolSearchMarker = L.marker(center, {icon: rolIcon}).addTo(map);
-                    rolSearchMarker.bindPopup(`<b>ROL Encontrado:</b> ${rolValue}`).openPopup(); 
+                    rolSearchMarker.bindPopup(`<b>ROL Encontrado:</b> ${rolValue}`); 
+                    // No abrir popup del marcador inmediatamente, se abrirá junto con el de la feature
 
                     // Abrir el popup de la capa de subdivisiones
-                    // Usamos setTimeout para asegurar que el mapa se ha reposicionado antes de abrir el popup,
-                    // lo que puede mejorar la fiabilidad.
                     setTimeout(() => {
                         foundFeature.openPopup(center);
-                        // Guarda una referencia a la capa (foundFeature) cuyo popup se abrió.
-                        // Esto nos permitirá cerrarlo explícitamente en cleanUpTemporaryMarkers.
-                        featureGlobalPopupRef = foundFeature; 
-                    }, 200); // Pequeño retraso de 200ms
+                        lastFoundRolFeature = foundFeature; // Guardar la referencia a la feature
+                    }, 200); 
 
-                    // NO activamos map.on('click', cleanUpTemporaryMarkers); aquí
-                    // Solo el cierre del popup del marcador o del popup de la feature limpia.
-                    rolSearchMarker.on('popupclose', function() {
-                        cleanUpTemporaryMarkers();
-                    });
-                    // Configurar el listener para limpiar el marcador si se cierra el popup de la capa
-                    foundFeature.on('popupclose', function() {
-                        cleanUpTemporaryMarkers();
-                    });
+                    // Escuchar solo los eventos de cierre de los popups directamente relacionados con la búsqueda
+                    // para disparar la limpieza.
+                    if (rolSearchMarker) { // Asegurarse de que el marcador existe
+                        rolSearchMarker.on('popupclose', function() {
+                            cleanUpTemporaryMarkers();
+                        });
+                    }
+                    if (foundFeature) { // Asegurarse de que la feature existe
+                        foundFeature.on('popupclose', function() {
+                            cleanUpTemporaryMarkers();
+                        });
+                    }
 
                 } else {
                     resultadoRolDiv.textContent = `ROL "${rolValue}" no encontrado.`;
