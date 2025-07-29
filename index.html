@@ -499,24 +499,25 @@
                 onRemove: function(map) { }
             });
 
-            // Añadir el control de coordenadas DEPUES de la leyenda en la misma posición 'topright'
-            var coordsSearchControlInstance = new CoordsSearchControl({position: 'topright'}).addTo(map);
+            // Añadir el control de coordenadas en la posición 'topleft'
+            // NOTA: Lo vamos a añadir aquí para que su posición sea la "base" para el buscador de ROL.
+            var coordsSearchControlInstance = new CoordsSearchControl({position: 'topleft'}).addTo(map);
 
             const coordenadasInput = coordsSearchControlInstance.getContainer().querySelector('#coordenadasInput');
             const buscarBoton = coordsSearchControlInstance.getContainer().querySelector('#buscarCoordenadas');
             const resultadoDiv = coordsSearchControlInstance.getContainer().querySelector('#resultadoBusqueda');
 
-            // --- Posicionar el buscador de coordenadas más abajo ---
+            // --- Posicionar el buscador de coordenadas un poco más abajo del control de zoom ---
             setTimeout(function() {
-                const legendControl = document.querySelector('.leaflet-control-layers');
+                const zoomControlElement = document.querySelector('.leaflet-control-zoom');
                 const coordSearchControlElement = coordsSearchControlInstance.getContainer();
 
-                if (legendControl && coordSearchControlElement) {
-                    const legendRect = legendControl.getBoundingClientRect();
+                if (zoomControlElement && coordSearchControlElement) {
+                    const zoomRect = zoomControlElement.getBoundingClientRect();
                     const mapRect = map.getContainer().getBoundingClientRect();
                     
-                    coordSearchControlElement.style.top = (legendRect.bottom - mapRect.top + 20) + 'px';
-                    coordSearchControlElement.style.right = '10px';
+                    coordSearchControlElement.style.top = (zoomRect.bottom - mapRect.top + 10) + 'px'; // 10px debajo del zoom control
+                    coordSearchControlElement.style.left = '10px';
                 }
             }, 500);
 
@@ -625,20 +626,17 @@
             const rolSugerenciasDiv = rolSearchControlInstance.getContainer().querySelector('#rolSugerencias'); // Referencia al nuevo div de sugerencias
 
 
-            // Posicionar el buscador de rol debajo del control de zoom
+            // Posicionar el buscador de rol DEBAJO DEL BUSCADOR DE COORDENADAS
             setTimeout(function() {
-                const zoomControlElement = document.querySelector('.leaflet-control-zoom');
+                const coordSearchControlElement = coordsSearchControlInstance.getContainer();
                 const rolSearchControlElement = rolSearchControlInstance.getContainer();
 
-                if (zoomControlElement && rolSearchControlElement) {
-                    const zoomRect = zoomControlElement.getBoundingClientRect();
+                if (coordSearchControlElement && rolSearchControlElement) {
+                    const coordRect = coordSearchControlElement.getBoundingClientRect();
                     const mapRect = map.getContainer().getBoundingClientRect();
                     
-                    // Ajustamos el valor 'top' para moverlo más arriba
-                    // Antes: (zoomRect.bottom - mapRect.top + 10) + 'px';
-                    // Nuevo: Un valor fijo o una resta mayor para subirlo
-                    rolSearchControlElement.style.top = (zoomRect.top - mapRect.top + 5) + 'px'; // Puedes ajustar '5' por un valor negativo si quieres que se superponga, o positivo para más espacio.
-                    rolSearchControlElement.style.left = '10px';
+                    rolSearchControlElement.style.top = (coordRect.bottom - mapRect.top + 10) + 'px'; // 10px debajo del buscador de coordenadas
+                    rolSearchControlElement.style.left = '10px'; // Misma alineación a la izquierda
                 }
             }, 500);
 
