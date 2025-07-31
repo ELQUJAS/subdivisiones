@@ -131,9 +131,9 @@
                 z-index: 1000;
                 position: absolute;
                 top: 10px;
-                /* CAMBIO: Ahora en la derecha del mapa, no del menú */
-                right: 10px; 
-                left: unset; 
+                /* CAMBIO: La leyenda se ubica en la esquina superior izquierda */
+                left: 10px; 
+                right: unset; /* Asegurarse de que right no interfiera */
             }
             /* Estos estilos ya están bien para el modo pestaña oculta */
             .leaflet-control-layers-base span {
@@ -426,8 +426,8 @@
             ];
 
             var lay = L.control.layers.tree(null, overlaysTree, {
-                collapsed: true, // CAMBIO: La leyenda estará colapsada (como pestaña) por defecto
-                position: 'topright' // CAMBIO: Posiciona la leyenda en la esquina superior derecha del mapa
+                collapsed: true, // La leyenda estará colapsada (como pestaña) por defecto
+                position: 'topleft' // CAMBIO: Posiciona la leyenda en la esquina superior izquierda del mapa
             });
             lay.addTo(map);
 
@@ -585,7 +585,7 @@
             const rolInput = rolSearchContainer.querySelector('#rolInput');
             const buscarRolBoton = rolSearchContainer.querySelector('#buscarRol');
             const resultadoRolDiv = rolSearchContainer.querySelector('#resultadoBusquedaRol');
-            const rolSugerenciasDiv = rolSearchContainer.querySelector('#rolSugerencias'); 
+            const rolSugerenciasDiv = rolSugerenciasDiv = rolSearchContainer.querySelector('#rolSugerencias'); 
 
 
             var rolIcon = L.divIcon({
