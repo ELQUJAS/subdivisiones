@@ -5,7 +5,7 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
         <meta name="mobile-web-app-capable" content="yes">
-        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-app-capable" content="yes">
         <link rel="stylesheet" href="css/leaflet.css">
         <link rel="stylesheet" href="css/L.Control.Layers.Tree.css">
         <link rel="stylesheet" href="css/qgis2web.css">
@@ -128,16 +128,16 @@
 
             /* Estilos para el control de capas (leyenda) */
             .leaflet-control-layers {
-                z-index: 1000;
+                z-index: 900; /* Ligeramente menor que el menú para que el menú esté siempre encima */
                 position: absolute;
                 top: 10px;
-                /* CAMBIO: La leyenda se ubica en la esquina superior izquierda */
-                left: 10px; 
-                right: unset; /* Asegurarse de que right no interfiera */
+                /* CAMBIO: Ubicación de la leyenda a la izquierda del menú lateral */
+                right: 310px; /* Ancho del menú (300px) + un pequeño margen (10px) */
+                left: unset; 
             }
             /* Estos estilos ya están bien para el modo pestaña oculta */
             .leaflet-control-layers-base span {
-                /* display: none; */ /* Deja que el span se muestre para el nombre de la capa base si hay */
+                /* display: none; */ 
             }
             .leaflet-control-layers-expanded .leaflet-control-layers-list {
                 display: block;
@@ -426,8 +426,8 @@
             ];
 
             var lay = L.control.layers.tree(null, overlaysTree, {
-                collapsed: true, // La leyenda estará colapsada (como pestaña) por defecto
-                position: 'topleft' // CAMBIO: Posiciona la leyenda en la esquina superior izquierda del mapa
+                collapsed: true, 
+                position: 'topright' // Esta es la posición general, el CSS la moverá a la izquierda del menú
             });
             lay.addTo(map);
 
@@ -585,7 +585,7 @@
             const rolInput = rolSearchContainer.querySelector('#rolInput');
             const buscarRolBoton = rolSearchContainer.querySelector('#buscarRol');
             const resultadoRolDiv = rolSearchContainer.querySelector('#resultadoBusquedaRol');
-            const rolSugerenciasDiv = rolSugerenciasDiv = rolSearchContainer.querySelector('#rolSugerencias'); 
+            const rolSugerenciasDiv = rolSearchContainer.querySelector('#rolSugerencias'); 
 
 
             var rolIcon = L.divIcon({
