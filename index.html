@@ -18,7 +18,7 @@
                 padding: 0;
                 margin: 0;
             }
-            /* CAMBIO: Estilos para el menú lateral derecho */
+            /* Estilos para el menú lateral derecho */
             #side-menu {
                 position: absolute;
                 top: 0;
@@ -35,28 +35,25 @@
                 flex-direction: column;
             }
 
-            /* CAMBIO: Ajustar el mapa para que no quede debajo del menú */
+            /* Ajustar el mapa para que no quede debajo del menú */
             #map {
                 margin-right: 300px; /* Misma anchura que el menú */
             }
 
             /* Estilos para los buscadores (adaptados al menú) */
-            .coordenadas-buscador.leaflet-control,
-            .rol-buscador.leaflet-control {
-                position: static; /* No flotante, se comporta como un elemento normal */
+            /* CAMBIO: Eliminar position:absolute y z-index del control base para que se posicione dentro del side-menu */
+            .coordenadas-buscador,
+            .rol-buscador { /* Importante: Sin .leaflet-control aquí para que no se herede el estilo de posicionamiento */
+                position: static; 
                 width: 100%; /* Ocupa todo el ancho del menú */
                 margin-bottom: 20px; /* Espacio entre buscadores */
                 background-color: transparent; /* Fondo transparente dentro del menú */
                 box-shadow: none; /* Sin sombra para integrarse mejor */
                 border: none; /* Sin borde */
                 padding: 0; /* Sin padding adicional */
-                z-index: auto; /* Z-index normal */
+                z-index: auto; 
             }
-
-            .coordenadas-buscador span {
-                display: none;
-            }
-
+            /* Mantener los estilos específicos de input y button */
             .coordenadas-buscador input,
             .rol-buscador input {
                 width: 100%;
@@ -131,12 +128,11 @@
             }
 
             /* Estilos para el control de capas (leyenda) */
-            /* CAMBIO: Reubicamos la leyenda dentro del menú o la dejamos flotante si no es parte del menú */
             .leaflet-control-layers {
                 z-index: 1000;
-                position: absolute; /* Sigue flotante pero podría reubicarse */
+                position: absolute;
                 top: 10px;
-                left: 10px; /* Cambiado a la izquierda para no chocar con el menú */
+                left: 10px; /* Mover a la izquierda para no chocar con el menú */
                 right: unset;
             }
             .leaflet-control-layers-base span {
@@ -149,10 +145,9 @@
                 display: none;
             }
 
-            /* --- Estilos para los desplegables en el popup (Opción 2) --- */
-            /* CAMBIO: Estilos para la información del ROL dentro del menú */
+            /* Estilos para la información del ROL dentro del menú */
             #rol-info-display details {
-                margin-bottom: 5px; /* Espacio entre los desplegables */
+                margin-bottom: 5px;
                 border: 1px solid #ddd;
                 border-radius: 3px;
                 background-color: #f9f9f9;
@@ -163,22 +158,21 @@
                 font-weight: bold;
                 cursor: pointer;
                 background-color: #eee;
-                border-bottom: 1px solid #ddd; /* Separador */
+                border-bottom: 1px solid #ddd;
             }
 
             #rol-info-display details[open] summary {
-                background-color: #e0e0e0; /* Fondo cuando está abierto */
+                background-color: #e0e0e0;
             }
 
             #rol-info-display details p {
-                padding: 5px 10px 8px; /* Padding para el contenido dentro del desplegable */
+                padding: 5px 10px 8px;
                 margin: 0;
-                font-size: 0.9em; /* Tamaño de fuente del contenido */
+                font-size: 0.9em;
                 line-height: 1.4;
             }
-            /* Ocultar las tablas internas generadas por qgis2web dentro de los <p> si no las queremos */
             #rol-info-display details p table {
-                width: 100%; /* Asegura que la tabla no desborde */
+                width: 100%;
                 border-collapse: collapse;
             }
             #rol-info-display details p th,
@@ -188,9 +182,9 @@
                 border-bottom: 1px solid #eee;
             }
             #rol-info-display details p th {
-                font-weight: normal; /* No tan negrita como el summary */
+                font-weight: normal;
                 color: #555;
-                width: 100px; /* Ancho fijo para las etiquetas de th */
+                width: 100px;
             }
 
             /* Estilos para el visualizador de coordenadas (solo Lat/Lon) */
@@ -202,11 +196,11 @@
                 font-family: Arial, sans-serif;
                 font-size: 0.9em;
                 color: #333;
-                min-width: 180px; /* Ancho suficiente */
-                text-align: center; /* Centrado para una sola línea */
+                min-width: 180px;
+                text-align: center;
                 z-index: 1000;
-                position: absolute; /* Sigue flotante */
-                bottom: 10px; /* Posicionado en la parte inferior izquierda */
+                position: absolute;
+                bottom: 10px;
                 left: 10px;
                 right: unset;
             }
@@ -219,24 +213,24 @@
                 display: flex;
                 justify-content: center;
                 align-items: center;
-                font-size: 30px; /* Tamaño del icono */
-                color: #ff0000; /* Color rojo vibrante */
-                text-shadow: 1px 1px 3px rgba(0,0,0,0.6); /* Sombra para que resalte */
+                font-size: 30px;
+                color: #ff0000;
+                text-shadow: 1px 1px 3px rgba(0,0,0,0.6);
                 opacity: 0.9;
             }
 
             /* Estilos para el contenedor de sugerencias del buscador de ROL */
             #rolSugerencias {
                 width: 100%;
-                max-height: 150px; /* Limita la altura de la lista de sugerencias */
-                overflow-y: auto; /* Agrega scroll si hay muchas sugerencias */
+                max-height: 150px;
+                overflow-y: auto;
                 border: 1px solid #ccc;
                 border-top: none;
                 background-color: white;
                 box-sizing: border-box;
-                position: absolute; /* Para que se superponga */
-                z-index: 1001; /* Asegura que esté por encima de otros elementos del control */
-                display: none; /* Oculto por defecto */
+                position: absolute; /* Sigue siendo absoluto para superponerse al input */
+                z-index: 1001;
+                display: none;
             }
 
             #rolSugerencias .sugerencia-item {
@@ -364,7 +358,6 @@
                 popupContent += createDetails('ESTADO LAGO', feature.properties['ESTADO LAG']);
                 popupContent += createDetails('COMUNIDAD INDÍGENA', feature.properties['COMUNIDAD']);
                 popupContent += createDetails('CONSTRUCCIONES', feature.properties['CONSTRUC.']);
-                // Modificación aquí: APROBACION PERMISO
                 popupContent += createDetails('APROBACIÓN PERMISO', feature.properties['APROBACIÓ']); 
                 popupContent += createDetails('FECHA', feature.properties['FECHA']);
                 popupContent += createDetails('UBICACIÓN', feature.properties['UBICACIÓN']);
@@ -373,11 +366,10 @@
                 popupContent += createDetails('DESTINO', feature.properties['DESTINO']);
                 popupContent += createDetails('RECEPCIÓN', feature.properties['RECEPCIÓN']);
 
-                var content = removeEmptyRowsFromPopupContent(popupContent, feature);
-                layer.on('popupopen', function(e) {
-                    addClassToPopupIfMedia(content, e.popup);
-                });
-                layer.bindPopup(content, { maxHeight: 400 });
+                // CAMBIO: La función pop_Subdivisiones... ahora devuelve directamente el HTML para ser usado en el menú o en un popup.
+                var contentDiv = document.createElement('div');
+                contentDiv.innerHTML = popupContent; // wrap in div to allow removeEmptyRowsFromPopupContent to work
+                return removeEmptyRowsFromPopupContent(contentDiv.innerHTML, feature);
             }
 
             function style_Subdivisiones20232024_2_0() {
@@ -403,7 +395,16 @@
                 interactive: true,
                 dataVar: 'json_Subdivisiones20232024_2',
                 layerName: 'layer_Subdivisiones20232024_2',
-                onEachFeature: pop_Subdivisiones20232024_2,
+                // CAMBIO: Al bindear el popup, usamos la función pop_Subdivisiones como generador de contenido.
+                // La lógica de addClassToPopupIfMedia se manejará solo si un popup flotante se abre.
+                onEachFeature: function(feature, layer) {
+                    layer.bindPopup(function(layer) {
+                        return pop_Subdivisiones20232024_2(feature, layer);
+                    }, { maxHeight: 400 });
+                    layer.on('popupopen', function(e) {
+                         addClassToPopupIfMedia(pop_Subdivisiones20232024_2(feature, layer), e.popup);
+                    });
+                },
                 style: style_Subdivisiones20232024_2_0,
             });
             bounds_group.addLayer(layer_Subdivisiones20232024_2);
@@ -428,7 +429,7 @@
 
             var lay = L.control.layers.tree(null, overlaysTree, {
                 collapsed: false,
-                position: 'topleft' // CAMBIO: Mover leyenda a la izquierda
+                position: 'topleft' // Mover leyenda a la izquierda
             });
             lay.addTo(map);
 
@@ -438,9 +439,8 @@
 
             // Variables globales para almacenar los marcadores temporales
             var coordSearchMarker = null;
-            var rolSearchMarker = null; // Marcador para la búsqueda de rol
-            // var currentRolFeaturePopup = null; // CAMBIO: Ya no necesitamos esta variable para popups flotantes
-
+            var rolSearchMarker = null; 
+            
             // Función para limpiar cualquier marcador temporal activo y popups de búsqueda
             function cleanUpTemporaryMarkers() {
                 if (coordSearchMarker) {
@@ -452,13 +452,13 @@
                     rolSearchMarker = null;
                 }
                 
-                // CAMBIO: Limpiar el contenido de información del ROL en el menú
+                // Limpiar el contenido de información del ROL en el menú
                 document.getElementById('rol-info-display').innerHTML = '<p>Aquí se mostrará la información del ROL buscado.</p>';
                 map.closePopup(); // Cierra cualquier popup que pueda estar abierto.
                 hideRolSuggestions(); // Ocultar sugerencias de ROL al limpiar
             }
             
-            // CAMBIO: Contenedores para los controles dentro del menú lateral
+            // Contenedores para los controles dentro del menú lateral
             const coordSearchContainer = document.getElementById('coord-search-container');
             const rolSearchContainer = document.getElementById('rol-search-container');
             const rolInfoDisplay = document.getElementById('rol-info-display');
@@ -467,7 +467,8 @@
             // --- Buscador de Coordenadas: Ahora se crea dinámicamente como un control personalizado ---
             var CoordsSearchControl = L.Control.extend({
                 onAdd: function(map) {
-                    var container = L.DomUtil.create('div', 'coordenadas-buscador leaflet-control');
+                    // CAMBIO: Ya no se añade el control al mapa, solo se crea el div
+                    var container = L.DomUtil.create('div', 'coordenadas-buscador'); 
                     container.innerHTML = `
                         <input type="text" id="coordenadasInput" placeholder="Lat, Lon (ej: -39.28 -72.24)">
                         <button id="buscarCoordenadas">Buscar</button>
@@ -477,22 +478,19 @@
                     L.DomEvent.disableClickPropagation(container);
                     L.DomEvent.disableScrollPropagation(container);
 
-                    return container;
+                    return container; // Devolvemos el contenedor para que sea añadido al DOM
                 },
                 onRemove: function(map) { }
             });
 
-            // CAMBIO: Añadir el control de coordenadas al nuevo contenedor en el menú
-            var coordsSearchControlInstance = new CoordsSearchControl({position: 'topright'}); // La posición es simbólica ahora
-            coordsSearchControlInstance.onAdd(map).id = 'coordsSearchInner'; // Llamamos onAdd manualmente
-            coordSearchContainer.appendChild(coordsSearchControlInstance.getContainer()); // Añadir al div del menú
+            // CAMBIO: Instanciamos el control y lo añadimos manualmente al contenedor del menú
+            var coordsSearchControlInstance = new CoordsSearchControl(); // No L.control.extend().addTo(map)
+            coordSearchContainer.appendChild(coordsSearchControlInstance.onAdd(map)); // Llamamos onAdd para obtener el elemento y lo añadimos
 
-            const coordenadasInput = coordsSearchControlInstance.getContainer().querySelector('#coordenadasInput');
-            const buscarBoton = coordsSearchControlInstance.getContainer().querySelector('#buscarCoordenadas');
-            const resultadoDiv = coordsSearchControlInstance.getContainer().querySelector('#resultadoBusqueda');
+            const coordenadasInput = coordSearchContainer.querySelector('#coordenadasInput');
+            const buscarBoton = coordSearchContainer.querySelector('#buscarCoordenadas');
+            const resultadoDiv = coordSearchContainer.querySelector('#resultadoBusqueda');
 
-            // CAMBIO: Ya no necesitamos posicionar los buscadores con setTimeout, el CSS del menú los gestiona.
-            
             resetLabels([layer_Subdivisiones20232024_2]);
             map.on("zoomend", function(){
                 resetLabels([layer_Subdivisiones20232024_2]);
@@ -546,7 +544,7 @@
             var MouseCoordinateDisplay = L.Control.extend({
                 onAdd: function(map) {
                     var container = L.DomUtil.create('div', 'coordinate-display leaflet-control');
-                    container.id = 'mouseCoordDisplay'; // Asigna un ID para facilitar la actualización
+                    container.id = 'mouseCoordDisplay'; 
                     container.innerHTML = `Lat: --.-- Lon: --.--`;
                     L.DomEvent.disableClickPropagation(container);
                     L.DomEvent.disableScrollPropagation(container);
@@ -561,7 +559,7 @@
             var mouseCoordDisplayElement = document.getElementById('mouseCoordDisplay');
 
             map.on('mousemove', function(e) {
-                var lat = e.latlng.lat.toFixed(6); // 6 decimales para mayor precisión
+                var lat = e.latlng.lat.toFixed(6); 
                 var lon = e.latlng.lng.toFixed(6);
                 mouseCoordDisplayElement.innerHTML = `Lat: ${lat} Lon: ${lon}`;
             });
@@ -571,44 +569,41 @@
                 mouseCoordDisplayElement.innerHTML = `Lat: --.-- Lon: --.--`;
             });
 
-            // --- NUEVO: Buscador de ROL ---
+            // --- Buscador de ROL ---
             var RolSearchControl = L.Control.extend({
                 onAdd: function(map) {
-                    var container = L.DomUtil.create('div', 'rol-buscador leaflet-control');
+                    // CAMBIO: Ya no se añade el control al mapa, solo se crea el div
+                    var container = L.DomUtil.create('div', 'rol-buscador'); 
                     container.innerHTML = `
                         <input type="text" id="rolInput" placeholder="Buscar ROL (ej: 1234-5)">
                         <button id="buscarRol">Buscar ROL</button>
                         <div id="resultadoBusquedaRol"></div>
                         <div id="rolSugerencias"></div> `;
 
-                    // Importante: No propagar clics ni scroll dentro del control para que no afecte el mapa
                     L.DomEvent.disableClickPropagation(container);
                     L.DomEvent.disableScrollPropagation(container);
 
-                    return container;
+                    return container; // Devolvemos el contenedor para que sea añadido al DOM
                 },
                 onRemove: function(map) { }
             });
 
-            // CAMBIO: Añadir el control de ROL al nuevo contenedor en el menú
-            var rolSearchControlInstance = new RolSearchControl({position: 'topleft'}); // La posición es simbólica
-            rolSearchControlInstance.onAdd(map).id = 'rolSearchInner'; // Llamamos onAdd manualmente
-            rolSearchContainer.appendChild(rolSearchControlInstance.getContainer()); // Añadir al div del menú
+            // CAMBIO: Instanciamos el control y lo añadimos manualmente al contenedor del menú
+            var rolSearchControlInstance = new RolSearchControl(); // No L.control.extend().addTo(map)
+            rolSearchContainer.appendChild(rolSearchControlInstance.onAdd(map)); // Llamamos onAdd para obtener el elemento y lo añadimos
 
-            const rolInput = rolSearchControlInstance.getContainer().querySelector('#rolInput');
-            const buscarRolBoton = rolSearchControlInstance.getContainer().querySelector('#buscarRol');
-            const resultadoRolDiv = rolSearchControlInstance.getContainer().querySelector('#resultadoBusquedaRol');
-            const rolSugerenciasDiv = rolSearchControlInstance.getContainer().querySelector('#rolSugerencias'); // Referencia al nuevo div de sugerencias
+            const rolInput = rolSearchContainer.querySelector('#rolInput');
+            const buscarRolBoton = rolSearchContainer.querySelector('#buscarRol');
+            const resultadoRolDiv = rolSearchContainer.querySelector('#resultadoBusquedaRol');
+            const rolSugerenciasDiv = rolSearchContainer.querySelector('#rolSugerencias'); 
 
-
-            // CAMBIO: Ya no necesitamos posicionar los buscadores con setTimeout, el CSS del menú los gestiona.
 
             // Icono personalizado para el marcador de ROL
             var rolIcon = L.divIcon({
-                className: 'rol-marker-icon fas fa-map-marker-alt', // Usamos Font Awesome para un icono de marcador
+                className: 'rol-marker-icon fas fa-map-marker-alt', 
                 iconSize: [30, 30],
-                iconAnchor: [15, 30], // Centrar la base del icono en la coordenada
-                popupAnchor: [0, -25] // Ajustar la posición del popup
+                iconAnchor: [15, 30], 
+                popupAnchor: [0, -25] 
             });
 
             // Función para ocultar las sugerencias
@@ -619,7 +614,7 @@
 
             // Manejador de entrada para las sugerencias de ROL
             rolInput.addEventListener('input', function() {
-                resultadoRolDiv.textContent = ''; // Limpiar mensaje de resultado al escribir
+                resultadoRolDiv.textContent = ''; 
                 const searchTerm = rolInput.value.trim().toLowerCase();
                 
                 if (searchTerm.length < 1) { 
@@ -663,13 +658,11 @@
             // Ocultar sugerencias y limpiar marcadores/popups de búsqueda con un clic inteligente
             map.on('click', function(e) {
                 // Ocultar sugerencias si el clic no fue dentro del control del buscador de ROL
-                // CAMBIO: Ajustar la condición para el menú lateral
                 if (!rolSearchContainer.contains(e.originalEvent.target)) {
                     hideRolSuggestions();
                 }
 
                 // Limpiar siempre marcadores temporales cuando se hace clic en el mapa fuera de un popup flotante
-                // CAMBIO: Asegurar que los popups temporales de coordenadas se cierran al hacer clic
                 if (!e.originalEvent.target.closest('.leaflet-popup') && !e.originalEvent.target.closest('.leaflet-marker-icon')) {
                     cleanUpTemporaryMarkers();
                 }
@@ -714,20 +707,13 @@
                     rolSearchMarker.bindPopup(`<b>ROL Encontrado:</b> ${rolValue}`); 
                     rolSearchMarker.openPopup(); 
 
-                    // CAMBIO: Desplegar la información del ROL en el menú lateral
-                    const featurePopupContent = pop_Subdivisiones20232024_2(foundFeature.feature, foundFeature);
-                    rolInfoDisplay.innerHTML = featurePopupContent.innerHTML; // Usar innerHTML del div temporal
+                    // Desplegar la información del ROL en el menú lateral
+                    // CAMBIO: Aseguramos que se pasa la feature y layer correctas para generar el contenido
+                    const rolInfoHtml = pop_Subdivisiones20232024_2(foundFeature.feature, foundFeature);
+                    rolInfoDisplay.innerHTML = rolInfoHtml;
 
                     rolSearchMarker.on('popupclose', function() {
-                        cleanUpTemporaryMarkers(); // Asegurarse de que al cerrar este popup se limpie todo
-                    });
-
-                    // CAMBIO: Al hacer clic en un ROL buscado, limpiar los marcadores temporales
-                    // si luego se hace clic en una feature del mapa que no es el marcador de busqueda
-                    foundFeature.once('click', function() {
-                        cleanUpTemporaryMarkers();
-                        // Reabrir el popup original de la feature si se desea, aunque ya esté en el menú
-                        // foundFeature.openPopup(center);
+                        cleanUpTemporaryMarkers(); 
                     });
 
                 } else {
