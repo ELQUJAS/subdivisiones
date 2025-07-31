@@ -131,12 +131,13 @@
                 z-index: 1000;
                 position: absolute;
                 top: 10px;
-                /* CAMBIO: Ahora en la derecha */
+                /* CAMBIO: Ahora en la derecha del mapa, no del menú */
                 right: 10px; 
-                left: unset; /* Asegurarse de que left no interfiera */
+                left: unset; 
             }
+            /* Estos estilos ya están bien para el modo pestaña oculta */
             .leaflet-control-layers-base span {
-                display: none;
+                /* display: none; */ /* Deja que el span se muestre para el nombre de la capa base si hay */
             }
             .leaflet-control-layers-expanded .leaflet-control-layers-list {
                 display: block;
@@ -425,8 +426,8 @@
             ];
 
             var lay = L.control.layers.tree(null, overlaysTree, {
-                collapsed: false, // La leyenda estará expandida por defecto
-                position: 'topright' // CAMBIO: Posiciona la leyenda en la esquina superior derecha
+                collapsed: true, // CAMBIO: La leyenda estará colapsada (como pestaña) por defecto
+                position: 'topright' // CAMBIO: Posiciona la leyenda en la esquina superior derecha del mapa
             });
             lay.addTo(map);
 
