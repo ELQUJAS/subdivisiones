@@ -416,7 +416,7 @@
                     layer.on('click', function() {
                         const rolInfoHtml = pop_Subdivisiones20232024_2(feature, layer);
                         document.getElementById('rol-info-display').innerHTML = rolInfoHtml;
-                        cleanUpTemporaryMarkers();
+                        cleanUpTemporaryMarkers(); // Esto solo limpia los marcadores del buscador
                     });
                 },
                 style: style_Subdivisiones20232024_2_0,
@@ -466,9 +466,8 @@
                     rolSearchMarker = null;
                 }
                 
-                // Nota: No limpiamos el display de info aquí, ya que el clic lo sobrescribirá.
-                // document.getElementById('rol-info-display').innerHTML = '<p>Aquí se mostrará la información del ROL buscado.</p>';
-                map.closePopup(); 
+                // Nota: Ya no cerramos el popup aquí
+                // map.closePopup(); 
                 hideRolSuggestions(); 
             }
             
@@ -664,8 +663,9 @@
                     hideRolSuggestions();
                 }
 
+                // Esta parte ahora no afecta al clic en el polígono
                 if (!e.originalEvent.target.closest('.leaflet-popup') && !e.originalEvent.target.closest('.leaflet-marker-icon')) {
-                    // No limpiamos los marcadores aquí para que el clic en la capa funcione
+                     // No limpiamos los marcadores aquí para que el clic en la capa funcione
                 }
             });
 
