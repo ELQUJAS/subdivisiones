@@ -412,6 +412,12 @@
                     layer.on('popupopen', function(e) {
                           addClassToPopupIfMedia(pop_Subdivisiones20232024_2(feature, layer), e.popup);
                     });
+                    // --- NUEVA FUNCIONALIDAD: Clic en la capa para mostrar info en el menú ---
+                    layer.on('click', function() {
+                        const rolInfoHtml = pop_Subdivisiones20232024_2(feature, layer);
+                        document.getElementById('rol-info-display').innerHTML = rolInfoHtml;
+                        cleanUpTemporaryMarkers();
+                    });
                 },
                 style: style_Subdivisiones20232024_2_0,
             });
@@ -460,7 +466,8 @@
                     rolSearchMarker = null;
                 }
                 
-                document.getElementById('rol-info-display').innerHTML = '<p>Aquí se mostrará la información del ROL buscado.</p>';
+                // Nota: No limpiamos el display de info aquí, ya que el clic lo sobrescribirá.
+                // document.getElementById('rol-info-display').innerHTML = '<p>Aquí se mostrará la información del ROL buscado.</p>';
                 map.closePopup(); 
                 hideRolSuggestions(); 
             }
@@ -658,7 +665,7 @@
                 }
 
                 if (!e.originalEvent.target.closest('.leaflet-popup') && !e.originalEvent.target.closest('.leaflet-marker-icon')) {
-                    cleanUpTemporaryMarkers();
+                    // No limpiamos los marcadores aquí para que el clic en la capa funcione
                 }
             });
 
