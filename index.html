@@ -304,10 +304,10 @@
                 tempDiv.innerHTML = content;
                 if (tempDiv.querySelector('td img')) {
                     popup._contentNode.classList.add('media');
-                        // Delay to force the redraw
-                        setTimeout(function() {
-                            popup.update();
-                        }, 10);
+                         // Delay to force the redraw
+                         setTimeout(function() {
+                             popup.update();
+                         }, 10);
                 } else {
                     popup._contentNode.classList.remove('media');
                 }
@@ -348,24 +348,34 @@
             function pop_Subdivisiones20232024_2(feature, layer) {
                 var popupContent = '<h4>ROL: ' + (feature.properties['rol'] !== null ? autolinker.link(String(feature.properties['rol']).replace(/'/g, '\'').toLocaleString()) : 'No disponible') + '</h4>';
                 
+                // Función auxiliar para crear un desplegable individual
                 function createDetails(summaryText, contentValue) {
                     var displayValue = (contentValue === null || contentValue === '') ? 'Sin información' : autolinker.link(String(contentValue).replace(/'/g, '\'').toLocaleString());
                     return '<details><summary>' + summaryText + '</summary><p>' + displayValue + '</p></details>';
                 }
 
+                // Campos que permanecen como desplegables de primer nivel
                 popupContent += createDetails('ZONA PRI', feature.properties['ZONA PRI']);
                 popupContent += createDetails('ZONA/SECTOR', feature.properties['ZONA']);
                 popupContent += createDetails('ZOIT', feature.properties['ZOIT']);
                 popupContent += createDetails('ESTADO LAGO', feature.properties['ESTADO LAG']);
                 popupContent += createDetails('COMUNIDAD INDÍGENA', feature.properties['COMUNIDAD']);
                 popupContent += createDetails('CONSTRUCCIONES', feature.properties['CONSTRUC.']);
-                popupContent += createDetails('APROBACIÓN PERMISO', feature.properties['APROBACIÓ']); 
+                
+                // --- Bloque para la estructura anidada de APROBACIÓN PERMISO ---
+                popupContent += '<details><summary>APROBACIÓN PERMISO</summary><div style="padding-left: 15px;">';
+                
+                // Agrega los desplegables anidados dentro del principal
                 popupContent += createDetails('FECHA', feature.properties['FECHA']);
                 popupContent += createDetails('UBICACIÓN', feature.properties['UBICACIÓN']);
                 popupContent += createDetails('PROPIETARIO', feature.properties['PROPIETARI']);
                 popupContent += createDetails('SUPERFICIE (MT2)', feature.properties['SUPERFICIE']);
                 popupContent += createDetails('DESTINO', feature.properties['DESTINO']);
                 popupContent += createDetails('RECEPCIÓN', feature.properties['RECEPCIÓN']);
+
+                // Cierra el desplegable principal
+                popupContent += '</div></details>';
+                // --- Fin del bloque ---
 
                 var contentDiv = document.createElement('div');
                 contentDiv.innerHTML = popupContent; 
@@ -400,7 +410,7 @@
                         return pop_Subdivisiones20232024_2(feature, layer);
                     }, { maxHeight: 400 });
                     layer.on('popupopen', function(e) {
-                         addClassToPopupIfMedia(pop_Subdivisiones20232024_2(feature, layer), e.popup);
+                          addClassToPopupIfMedia(pop_Subdivisiones20232024_2(feature, layer), e.popup);
                     });
                 },
                 style: style_Subdivisiones20232024_2_0,
@@ -702,7 +712,6 @@
                     rolInfoDisplay.innerHTML = '<p>No se encontró información para el ROL especificado.</p>';
                 }
             });
-
         </script>
     </body>
 </html>
