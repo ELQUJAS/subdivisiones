@@ -363,7 +363,9 @@
                 popupContent += createDetails('CONSTRUCCIONES', feature.properties['CONSTRUC.']);
                 
                 // --- Bloque para la estructura anidada de APROBACIÓN PERMISO ---
-                popupContent += '<details><summary>APROBACIÓN PERMISO</summary><div style="padding-left: 15px;">';
+                // Ahora, el texto del resumen incluye la información del campo 'APROBACIÓ'
+                var aprobacionValue = (feature.properties['APROBACIÓ'] === null || feature.properties['APROBACIÓ'] === '') ? 'Sin información' : autolinker.link(String(feature.properties['APROBACIÓ']).replace(/'/g, '\'').toLocaleString());
+                popupContent += `<details><summary>APROBACIÓN PERMISO: ${aprobacionValue}</summary><div style="padding-left: 15px;">`;
                 
                 // Agrega los desplegables anidados dentro del principal
                 popupContent += createDetails('FECHA', feature.properties['FECHA']);
@@ -412,11 +414,11 @@
                     layer.on('popupopen', function(e) {
                           addClassToPopupIfMedia(pop_Subdivisiones20232024_2(feature, layer), e.popup);
                     });
-                    // --- NUEVA FUNCIONALIDAD: Clic en la capa para mostrar info en el menú ---
+                    // Clic en la capa para mostrar info en el menú
                     layer.on('click', function() {
                         const rolInfoHtml = pop_Subdivisiones20232024_2(feature, layer);
                         document.getElementById('rol-info-display').innerHTML = rolInfoHtml;
-                        cleanUpTemporaryMarkers(); // Esto solo limpia los marcadores del buscador
+                        cleanUpTemporaryMarkers();
                     });
                 },
                 style: style_Subdivisiones20232024_2_0,
