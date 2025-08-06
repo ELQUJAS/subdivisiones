@@ -21,7 +21,7 @@
             height: 100%;
             padding: 0;
             margin: 0;
-            font-family: Arial, sans-serif;
+            font-family: Inter, Arial, sans-serif;
             overflow: hidden; /* Evita el scroll global */
         }
 
@@ -31,40 +31,81 @@
             flex-direction: column;
             height: 100%;
         }
-
+        
         /* Nuevo estilo para el encabezado superior */
         #header {
-            background-color: #0d47a1; /* Azul oscuro */
-            color: white;
-            padding: 10px 20px;
+            background-color: #f7f7f7;
+            border-bottom: 1px solid #ccc;
+            padding: 8px 15px;
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             z-index: 1001;
         }
 
-        #header img {
-            height: 50px; /* Ajusta el tamaño del logo */
-            margin-right: 20px;
+        #header .header-left,
+        #header .header-right {
+            display: flex;
+            align-items: center;
         }
 
         #header h1 {
+            font-size: 1.2em;
+            margin: 0 20px;
+            color: #333;
+        }
+        
+        #header .header-button {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0 10px;
+            cursor: pointer;
+            color: #555;
+            font-size: 0.8em;
+            text-align: center;
+            transition: color 0.2s ease;
+        }
+        
+        #header .header-button:hover {
+            color: #007bff;
+        }
+        
+        #header .header-button i {
             font-size: 1.5em;
-            margin: 0;
+            margin-bottom: 5px;
+        }
+        
+        #header .header-right .search-rol-btn {
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 8px 12px;
+            color: #555;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
         }
 
+        #header .header-right .search-rol-btn:hover {
+            background-color: #e0e0e0;
+        }
+        
         /* Contenedor del mapa y el menú, que ocupará el espacio restante */
         #content-container {
             display: flex;
             flex-grow: 1; /* Permite que este contenedor llene el espacio vertical */
+            position: relative;
         }
 
-        /* Estilos para el menú lateral derecho */
-        #side-menu {
-            position: relative; /* Cambiado de absolute a relative para el flexbox */
-            width: 300px;
+        /* Estilos para el menú lateral derecho (nueva versión) */
+        #sidebar-right {
+            position: relative;
+            width: 350px; /* Ancho ajustado para el nuevo diseño */
             height: 100%;
-            background-color: rgba(255, 255, 255, 0.95);
+            background-color: #ffffff;
+            border-left: 1px solid #ccc;
             box-shadow: -2px 0 8px rgba(0,0,0,0.15);
             z-index: 1000;
             padding: 15px;
@@ -73,150 +114,140 @@
             display: flex;
             flex-direction: column;
         }
+        
+        #sidebar-right h3 {
+            font-size: 1.2em;
+            margin: 0;
+            margin-bottom: 15px;
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 5px;
+        }
 
-        /* El mapa ocupará el espacio restante horizontalmente */
+        /* Contenedor del mapa */
         #map {
             flex-grow: 1;
+            position: relative;
         }
 
-        /* Estilos para los buscadores (adaptados al menú) */
-        .coordenadas-buscador,
-        .rol-buscador { 
-            position: static; 
-            width: 100%;
-            margin-bottom: 20px;
-            background-color: transparent;
-            box-shadow: none;
-            border: none;
-            padding: 0;
-            z-index: auto; 
+        /* Estilos para los campos de búsqueda en el nuevo menú */
+        .search-field-group {
+            margin-bottom: 15px;
         }
 
-        /* Mantener los estilos específicos de input y button */
-        .coordenadas-buscador input,
-        .rol-buscador input {
+        .search-field-group label {
+            display: block;
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 5px;
+        }
+
+        .search-field-group select,
+        .search-field-group input[type="text"] {
             width: 100%;
-            padding: 8px 12px;
-            margin-bottom: 8px;
+            padding: 8px;
             border: 1px solid #ccc;
-            border-radius: 3px;
+            border-radius: 4px;
             box-sizing: border-box;
-            font-size: 0.95em;
-            color: #333;
-            transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-        }
-
-        .coordenadas-buscador input::placeholder,
-        .rol-buscador input::placeholder {
-            color: #999;
             font-size: 0.9em;
         }
 
-        .coordenadas-buscador input:focus,
-        .rol-buscador input:focus {
-            border-color: #007bff;
-            box-shadow: 0 0 4px rgba(0, 123, 255, 0.4);
-            outline: none;
+        .search-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
         }
-
-        .coordenadas-buscador button,
-        .rol-buscador button {
-            width: 100%;
-            padding: 8px 12px;
-            color: white;
+        
+        .search-buttons button {
+            flex-grow: 1;
+            padding: 10px;
             border: none;
-            border-radius: 3px;
+            border-radius: 4px;
+            color: white;
+            font-weight: bold;
             cursor: pointer;
-            font-size: 0.95em;
-            font-weight: normal;
-            transition: background-color 0.2s ease-in-out;
+            transition: background-color 0.2s ease;
         }
-
-        .coordenadas-buscador button {
+        
+        .search-buttons .buscar-btn {
             background-color: #007bff;
         }
-
-        .coordenadas-buscador button:hover {
+        .search-buttons .buscar-btn:hover {
             background-color: #0056b3;
         }
-
-        .coordenadas-buscador button:active {
-            background-color: #004085;
+        
+        .search-buttons .ocultar-btn {
+            background-color: #dc3545;
+        }
+        .search-buttons .ocultar-btn:hover {
+            background-color: #c82333;
+        }
+        
+        .search-results-table {
+            border-top: 2px solid #007bff;
+            padding-top: 15px;
         }
 
-        .rol-buscador button {
-            background-color: #28a745; /* Color verde para el botón de rol */
+        .search-results-table h4 {
+            font-size: 1em;
+            color: #333;
+            margin-bottom: 10px;
         }
-
-        .rol-buscador button:hover {
+        
+        .search-results-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .search-results-table th,
+        .search-results-table td {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+            text-align: left;
+            font-size: 0.9em;
+        }
+        
+        .search-results-table th {
+            background-color: #f7f7f7;
+            font-weight: bold;
+            color: #555;
+        }
+        
+        .search-results-table td:last-child {
+            text-align: right;
+        }
+        
+        .search-results-table .add-btn {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.8em;
+            transition: background-color 0.2s ease;
+        }
+        
+        .search-results-table .add-btn:hover {
             background-color: #218838;
         }
 
-        .rol-buscador button:active {
-            background-color: #1e7e34;
-        }
-
-        #resultadoBusqueda,
-        #resultadoBusquedaRol {
-            font-size: 0.8em;
-            margin-top: 5px;
-            color: #dc3545;
-            font-weight: normal;
-            text-align: center;
-            width: 100%;
-        }
-
-        /* Estilos para el control de capas (leyenda) */
+        /* Estilos para el control de capas (leyenda), ahora en el mapa */
         .leaflet-control-layers {
             z-index: 900;
             position: absolute;
             top: 10px;
-            right: 310px; /* Posicionado a la izquierda del menú lateral */
+            right: 10px; /* Posicionado dentro del mapa, arriba a la derecha */
             left: unset; 
         }
 
-        /* Estilos para la información del ROL dentro del menú */
-        #rol-info-display details {
-            margin-bottom: 5px;
-            border: 1px solid #ddd;
-            border-radius: 3px;
-            background-color: #f9f9f9;
+        /* Estilos del control de zoom */
+        .leaflet-control-zoom {
+            position: absolute;
+            top: 10px;
+            left: 10px; /* Posicionado dentro del mapa, arriba a la izquierda */
         }
-
-        #rol-info-display summary {
-            padding: 8px 10px;
-            font-weight: bold;
-            cursor: pointer;
-            background-color: #eee;
-            border-bottom: 1px solid #ddd;
-        }
-
-        #rol-info-display details[open] summary {
-            background-color: #e0e0e0;
-        }
-
-        #rol-info-display details p {
-            padding: 5px 10px 8px;
-            margin: 0;
-            font-size: 0.9em;
-            line-height: 1.4;
-        }
-        #rol-info-display details p table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        #rol-info-display details p th,
-        #rol-info-display details p td {
-            padding: 4px 6px;
-            text-align: left;
-            border-bottom: 1px solid #eee;
-        }
-        #rol-info-display details p th {
-            font-weight: normal;
-            color: #555;
-            width: 100px;
-        }
-
+        
         /* Estilos para el visualizador de coordenadas (solo Lat/Lon) */
         .coordinate-display.leaflet-control {
             background: rgba(255, 255, 255, 0.9);
@@ -248,59 +279,112 @@
             text-shadow: 1px 1px 3px rgba(0,0,0,0.6);
             opacity: 0.9;
         }
-
-        /* Estilos para el contenedor de sugerencias del buscador de ROL */
-        #rolSugerencias {
-            width: 100%;
-            max-height: 150px;
-            overflow-y: auto;
-            border: 1px solid #ccc;
-            border-top: none;
-            background-color: white;
-            box-sizing: border-box;
-            position: absolute; 
-            z-index: 1001;
-            display: none;
-        }
-
-        #rolSugerencias .sugerencia-item {
-            padding: 8px 12px;
-            cursor: pointer;
-            border-bottom: 1px solid #eee;
-            font-size: 0.9em;
-            color: #555;
-        }
-
-        #rolSugerencias .sugerencia-item:last-child {
-            border-bottom: none;
-        }
-
-        #rolSugerencias .sugerencia-item:hover {
-            background-color: #f0f0f0;
-        }
     </style>
-    <title>Mapa Web de Villarrica</title>
+    <title>Cartografía Digital SII Mapas</title>
 </head>
 <body>
     <div id="main-container">
         <!-- Nuevo encabezado superior -->
         <div id="header">
-            <img src="color_sin_fondo.png" alt="Logo Villarrica">
-            <h1>INFORMACIÓN TERRITORIAL DE LA COMUNA DE VILLARRICA</h1>
+            <div class="header-left">
+                <i class="fas fa-hashtag" style="font-size: 1.8em; color: #555;"></i>
+                <h1>CARTOGRAFIA DIGITAL SII MAPAS</h1>
+                <div class="header-button">
+                    <i class="fas fa-search-location"></i>
+                    <span>Catálogo Mapas</span>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="header-button">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <span>Ingresar</span>
+                </div>
+                <div class="header-button">
+                    <i class="fas fa-search"></i>
+                    <span>Buscar Comunas</span>
+                </div>
+                <div class="header-button">
+                    <i class="fas fa-search"></i>
+                    <span>Buscar Reavalúo</span>
+                </div>
+                <div class="header-button">
+                    <i class="fas fa-search"></i>
+                    <span>Buscar Dirección</span>
+                </div>
+                <div class="header-button">
+                    <i class="fas fa-search"></i>
+                    <span>Buscar Rol</span>
+                </div>
+            </div>
         </div>
         <!-- Contenedor para el mapa y el menú lateral -->
         <div id="content-container">
             <!-- Contenedor del mapa -->
             <div id="map"></div>
-            <!-- Menú lateral derecho -->
-            <div id="side-menu">
-                <h3>Buscadores</h3>
-                <div id="coord-search-container"></div>
-                <div id="rol-search-container"></div>
-                <h4>Información de ROL</h4>
-                <div id="rol-info-display">
-                    <p>Aquí se mostrará la información del ROL buscado.</p>
+            <!-- Nuevo menú lateral derecho -->
+            <div id="sidebar-right">
+                <h3>BÚSQUEDA DE INFORMACIÓN</h3>
+                <div class="search-field-group">
+                    <label for="region-select">Región</label>
+                    <select id="region-select">
+                        <option>REGIÓN DE LA ARAUCANÍA</option>
+                    </select>
                 </div>
+                <div class="search-field-group">
+                    <label for="comuna-select">Comuna</label>
+                    <select id="comuna-select">
+                        <option>VILLARRICA</option>
+                    </select>
+                </div>
+                <div class="search-field-group">
+                    <label for="search-input">Buscar</label>
+                    <input type="text" id="search-input" placeholder="Buscar ROL (ej: 1234-5)">
+                </div>
+                <div class="search-buttons">
+                    <button class="buscar-btn" id="search-btn">Buscar</button>
+                    <button class="ocultar-btn" id="hide-btn">Ocultar</button>
+                </div>
+                
+                <div class="search-results-table">
+                    <h4>Información</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Información</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Predios</td>
+                                <td><button class="add-btn">Agregar</button></td>
+                            </tr>
+                            <tr>
+                                <td>Manzanas</td>
+                                <td><button class="add-btn">Agregar</button></td>
+                            </tr>
+                            <tr>
+                                <td>Áreas Homogéneas RAV SNE 2025</td>
+                                <td><button class="add-btn">Agregar</button></td>
+                            </tr>
+                            <tr>
+                                <td>Sector Agrícola RAV 2024</td>
+                                <td><button class="add-btn">Agregar</button></td>
+                            </tr>
+                            <tr>
+                                <td>Áreas Homogéneas RAV SNE 2024</td>
+                                <td><button class="add-btn">Agregar</button></td>
+                            </tr>
+                            <tr>
+                                <td>Áreas Homogéneas RAV SNE 2023</td>
+                                <td><button class="add-btn">Agregar</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div id="resultadoBusquedaRol"></div>
+                <div id="rolSugerencias"></div>
             </div>
         </div>
     </div>
@@ -459,7 +543,7 @@
                 // Clic en la capa para mostrar info en el menú lateral
                 layer.on('click', function() {
                     const rolInfoHtml = pop_Subdivisiones20232024_2(feature, layer);
-                    document.getElementById('rol-info-display').innerHTML = rolInfoHtml;
+                    // document.getElementById('rol-info-display').innerHTML = rolInfoHtml;
                     cleanUpTemporaryMarkers();
                 });
             },
@@ -508,85 +592,11 @@
                 map.removeLayer(rolSearchMarker);
                 rolSearchMarker = null;
             }
-            hideRolSuggestions(); 
+            // hideRolSuggestions();
         }
         
-        const coordSearchContainer = document.getElementById('coord-search-container');
-        const rolSearchContainer = document.getElementById('rol-search-container');
+        const sidebarRight = document.getElementById('sidebar-right');
         const rolInfoDisplay = document.getElementById('rol-info-display');
-
-        // --- Buscador de Coordenadas: Ahora se crea dinámicamente como un control personalizado ---
-        var CoordsSearchControl = L.Control.extend({
-            onAdd: function(map) {
-                var container = L.DomUtil.create('div', 'coordenadas-buscador'); 
-                container.innerHTML = `
-                    <input type="text" id="coordenadasInput" placeholder="Lat, Lon (ej: -39.28 -72.24)">
-                    <button id="buscarCoordenadas">Buscar</button>
-                    <div id="resultadoBusqueda"></div>
-                `;
-
-                L.DomEvent.disableClickPropagation(container);
-                L.DomEvent.disableScrollPropagation(container);
-
-                return container; 
-            },
-            onRemove: function(map) { }
-        });
-
-        var coordsSearchControlInstance = new CoordsSearchControl(); 
-        coordSearchContainer.appendChild(coordsSearchControlInstance.onAdd(map)); 
-
-        const coordenadasInput = coordSearchContainer.querySelector('#coordenadasInput');
-        const buscarBoton = coordSearchContainer.querySelector('#buscarCoordenadas');
-        const resultadoDiv = coordSearchContainer.querySelector('#resultadoBusqueda');
-
-        resetLabels([layer_Subdivisiones20232024_2]);
-        map.on("zoomend", function(){
-            resetLabels([layer_Subdivisiones20232024_2]);
-        });
-        map.on("layeradd", function(){
-            resetLabels([layer_Subdivisiones20232024_2]);
-        });
-        map.on("layerremove", function(){
-            resetLabels([layer_Subdivisiones20232024_2]);
-        });
-
-        buscarBoton.addEventListener('click', function() {
-            cleanUpTemporaryMarkers(); 
-
-            const inputValue = coordenadasInput.value.trim();
-            const parts = inputValue.split(/\s+/);
-
-            resultadoDiv.textContent = '';
-
-            if (parts.length !== 2) {
-                resultadoDiv.textContent = 'Formato: Lat, Lon';
-                return;
-            }
-
-            const lat = parseFloat(parts[0]);
-            const lng = parseFloat(parts[1]);
-
-            if (isNaN(lat) || isNaN(lng)) {
-                resultadoDiv.textContent = 'Coordenadas inválidas.';
-                return;
-            }
-
-            map.setView([lat, lng], 15);
-
-            coordSearchMarker = L.marker([lat, lng]).addTo(map);
-            const formattedLat = lat.toFixed(6); 
-            const formattedLng = lng.toFixed(6);
-            coordSearchMarker.bindPopup(`<b>Coordenadas:</b><br>${formattedLat}, ${formattedLng}`).openPopup();
-
-            coordSearchMarker.on('popupclose', function() {
-                cleanUpTemporaryMarkers();
-            });
-        });
-
-        coordenadasInput.addEventListener('input', function() {
-            resultadoDiv.textContent = '';
-        });
 
         // --- Visualizador de coordenadas Latitud/Longitud al mover el mouse ---
         var MouseCoordinateDisplay = L.Control.extend({
@@ -616,114 +626,17 @@
             mouseCoordDisplayElement.innerHTML = `Lat: --.-- Lon: --.--`;
         });
 
-        // --- Buscador de ROL ---
-        var RolSearchControl = L.Control.extend({
-            onAdd: function(map) {
-                var container = L.DomUtil.create('div', 'rol-buscador'); 
-                container.innerHTML = `
-                    <input type="text" id="rolInput" placeholder="Buscar ROL (ej: 1234-5)">
-                    <button id="buscarRol">Buscar ROL</button>
-                    <div id="resultadoBusquedaRol"></div>
-                    <div id="rolSugerencias"></div>`;
+        // --- Funcionalidad del nuevo buscador ---
+        const searchInput = document.getElementById('search-input');
+        const searchBtn = document.getElementById('search-btn');
 
-                L.DomEvent.disableClickPropagation(container);
-                L.DomEvent.disableScrollPropagation(container);
-
-                return container; 
-            },
-            onRemove: function(map) { }
-        });
-
-        var rolSearchControlInstance = new RolSearchControl(); 
-        rolSearchContainer.appendChild(rolSearchControlInstance.onAdd(map)); 
-
-        const rolInput = rolSearchContainer.querySelector('#rolInput');
-        const buscarRolBoton = rolSearchContainer.querySelector('#buscarRol');
-        const resultadoRolDiv = rolSearchContainer.querySelector('#resultadoBusquedaRol');
-        const rolSugerenciasDiv = rolSearchContainer.querySelector('#rolSugerencias'); 
-
-        var rolIcon = L.divIcon({
-            className: 'rol-marker-icon fas fa-map-marker-alt', 
-            iconSize: [30, 30],
-            iconAnchor: [15, 30], 
-            popupAnchor: [0, -25] 
-        });
-
-        function hideRolSuggestions() {
-            rolSugerenciasDiv.style.display = 'none';
-            rolSugerenciasDiv.innerHTML = '';
-        }
-
-        rolInput.addEventListener('input', function() {
-            resultadoRolDiv.textContent = ''; 
-            const searchTerm = rolInput.value.trim().toLowerCase();
-            
-            if (searchTerm.length < 1) { 
-                hideRolSuggestions();
-                return;
-            }
-
-            const matchingRoles = new Set(); 
-            layer_Subdivisiones20232024_2.eachLayer(function(layer) {
-                if (layer.feature && layer.feature.properties && layer.feature.properties['rol'] !== null) {
-                    const rol = String(layer.feature.properties['rol']).trim().toLowerCase();
-                    if (rol.includes(searchTerm)) {
-                        matchingRoles.add(rol);
-                    }
-                }
-            });
-
-            const sortedRoles = Array.from(matchingRoles).sort();
-
-            rolSugerenciasDiv.innerHTML = ''; 
-
-            if (sortedRoles.length > 0) {
-                sortedRoles.slice(0, 10).forEach(rol => { 
-                    const suggestionItem = document.createElement('div');
-                    suggestionItem.classList.add('sugerencia-item');
-                    suggestionItem.textContent = rol;
-                    suggestionItem.addEventListener('mousedown', function(e) { 
-                        e.preventDefault(); 
-                        rolInput.value = rol; 
-                        hideRolSuggestions(); 
-                        buscarRolBoton.click(); 
-                    });
-                    rolSugerenciasDiv.appendChild(suggestionItem);
-                });
-                rolSugerenciasDiv.style.display = 'block'; 
-            } else {
-                hideRolSuggestions();
-            }
-        });
-
-        map.on('click', function(e) {
-            if (!rolSearchContainer.contains(e.originalEvent.target)) {
-                hideRolSuggestions();
-            }
-
-            if (!e.originalEvent.target.closest('.leaflet-popup') && !e.originalEvent.target.closest('.leaflet-marker-icon')) {
-            }
-        });
-
-
-        rolInput.addEventListener('blur', function() {
-            setTimeout(() => { 
-                if (!rolSugerenciasDiv.contains(document.activeElement) && document.activeElement !== rolInput) {
-                    hideRolSuggestions();
-                }
-            }, 100);
-        });
-
-
-        buscarRolBoton.addEventListener('click', function() {
+        searchBtn.addEventListener('click', function() {
             cleanUpTemporaryMarkers(); 
 
-            const rolValue = rolInput.value.trim();
-            resultadoRolDiv.textContent = '';
-            hideRolSuggestions(); 
-
+            const rolValue = searchInput.value.trim();
+            
             if (!rolValue) {
-                resultadoRolDiv.textContent = 'Por favor, ingrese un ROL.';
+                // No hay ROL para buscar, no hacer nada
                 return;
             }
 
@@ -739,22 +652,20 @@
                 const center = foundFeature.getBounds().getCenter();
                 map.setView(center, 17); 
 
-                rolSearchMarker = L.marker(center, {icon: rolIcon}).addTo(map);
-                rolSearchMarker.bindPopup(`<b>ROL Encontrado:</b> ${rolValue}`); 
-                rolSearchMarker.openPopup(); 
-
-                const rolInfoHtml = pop_Subdivisiones20232024_2(foundFeature.feature, foundFeature);
-                rolInfoDisplay.innerHTML = rolInfoHtml;
-
-                rolSearchMarker.on('popupclose', function() {
-                    cleanUpTemporaryMarkers(); 
-                });
+                // Si se encuentra, abrimos el popup de la capa para mostrar la info
+                foundFeature.openPopup();
+                
+                // Mover el mapa para que el popup no quede oculto por la barra lateral
+                const mapWidth = map.getSize().x;
+                const sidebarWidth = sidebarRight.offsetWidth;
+                const newCenter = map.project(center).subtract([sidebarWidth / 2, 0]);
+                map.panTo(map.unproject(newCenter));
 
             } else {
-                resultadoRolDiv.textContent = `ROL "${rolValue}" no encontrado.`;
-                rolInfoDisplay.innerHTML = '<p>No se encontró información para el ROL especificado.</p>';
+                alert(`ROL "${rolValue}" no encontrado.`);
             }
         });
+        
     </script>
 </body>
 </html>
