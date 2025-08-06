@@ -23,6 +23,7 @@
             margin: 0;
             font-family: Inter, Arial, sans-serif;
             overflow: hidden; /* Evita el scroll global */
+            background-color: #d0e6d6; /* Color de fondo ajustado para que se parezca a la imagen */
         }
 
         /* Contenedor principal que se adapta a la pantalla */
@@ -34,8 +35,8 @@
 
         /* Nuevo estilo para el encabezado superior */
         #header {
-            background-color: #0d47a1; /* Azul oscuro */
-            color: white;
+            background-color: #f7f7f7; /* Color de fondo ajustado a gris claro */
+            color: #333;
             padding: 10px 20px;
             display: flex;
             align-items: center;
@@ -65,7 +66,7 @@
             position: relative;
             width: 350px; /* Ancho ajustado para el nuevo diseño */
             height: 100%;
-            background-color: #ffffff;
+            background-color: #ffffff; /* Fondo blanco para el menú */
             border-left: 1px solid #ccc;
             box-shadow: -2px 0 8px rgba(0,0,0,0.15);
             z-index: 1000;
@@ -257,16 +258,16 @@
 </head>
 <body>
     <div id="main-container">
-        <!-- Nuevo encabezado superior -->
+        <!-- Encabezado con logo y título -->
         <div id="header">
             <img src="color_sin_fondo.png" alt="Logo Villarrica">
             <h1>INFORMACIÓN TERRITORIAL DE LA COMUNA DE VILLARRICA</h1>
         </div>
-        <!-- Contenedor para el mapa y el menú lateral -->
+        <!-- Contenedor principal del mapa y el menú -->
         <div id="content-container">
-            <!-- Contenedor del mapa -->
+            <!-- Mapa -->
             <div id="map"></div>
-            <!-- Nuevo menú lateral derecho -->
+            <!-- Menú lateral derecho -->
             <div id="sidebar-right">
                 <h3>Buscadores</h3>
                 <div class="search-field-group">
