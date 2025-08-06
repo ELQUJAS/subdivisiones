@@ -91,7 +91,7 @@
         /* Estilos para el menú lateral derecho */
         #sidebar-right {
             position: relative;
-            width: 350px; /* Ancho ajustado para el nuevo diseño */
+            width: 400px; /* Ancho ajustado para que el menú sea más grande */
             height: 100%;
             background-color: #ffffff;
             border-left: 1px solid #ccc;
@@ -125,6 +125,7 @@
             flex-grow: 1;
             position: relative;
             background-color: #f7f7f7; /* Fondo del mapa para que se asemeje a la imagen */
+            width: calc(100% - 400px); /* Ajuste del ancho del mapa */
         }
         
         #map .leaflet-container {
@@ -255,7 +256,7 @@
         .leaflet-control-layers {
             position: absolute;
             top: 10px;
-            right: 310px; /* Posicionado a la izquierda del menú lateral */
+            right: 410px; /* Posicionado a la izquierda del menú lateral */
         }
 
         /* Estilos para el marcador personalizado del ROL */
@@ -787,4 +788,3 @@
     </script>
 </body>
 </html>
-
