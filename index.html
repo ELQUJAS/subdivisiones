@@ -53,6 +53,7 @@
             background-color: #e0e0e0;
             border-radius: 1rem;
         }
+        /* Posiciona los controles de Leaflet */
         .leaflet-control-zoom {
             position: absolute;
             top: 1.5rem;
@@ -65,6 +66,7 @@
             right: 1.5rem;
             z-index: 1000;
         }
+        /* ESTILO para el visor de coordenadas */
         .coordinate-display.leaflet-control {
             position: absolute;
             bottom: 1.5rem;
@@ -316,7 +318,6 @@
         // 2. Añadimos la capa de subdivisiones al mapa de inmediato
         map.addLayer(layer_Subdivisiones20232024_2);
 
-        // --- Configuración del control de capas (leyenda) ---
         var overlaysTree = [
             {
                 label: '<b>Capas de Información</b>',
@@ -378,6 +379,7 @@
             onRemove: function(map) {}
         });
 
+        // --- CORRECCIÓN: Agregar el visor de coordenadas al mapa ---
         var mouseCoordinateDisplay = new MouseCoordinateDisplay({position: 'bottomleft'}).addTo(map);
         var mouseCoordDisplayElement = document.getElementById('mouseCoordDisplay');
 
