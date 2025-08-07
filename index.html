@@ -125,7 +125,7 @@
     <div class="flex flex-1 overflow-hidden p-6">
         <div class="flex-1 bg-white p-4 flex items-center justify-center relative rounded-2xl shadow-2xl mr-6">
             <div id="map" class="absolute inset-0 z-0"></div>
-            </div>
+        </div>
 
         <div id="sidebar-right" class="w-96 bg-white p-6 shadow-2xl flex flex-col space-y-6 overflow-y-auto rounded-2xl">
             <div class="bg-blue-50 p-5 rounded-xl shadow-inner border border-blue-200">
@@ -175,11 +175,6 @@
     <script src="js/leaflet.photon.js"></script>
     <script src="data/Subdivisiones20232024_2.js"></script>
     <script>
-        // Todo el código JavaScript original se mantiene aquí
-        // Se han hecho ajustes para que la lógica de Leaflet interactúe con los nuevos IDs y clases
-        // de los elementos HTML, como 'coordenadasInput', 'buscarCoordenadas', 'rolInput', etc.
-        // La lógica del mapa y los buscadores es la misma, solo se adaptó al nuevo diseño de UI.
-
         function customAlert(message) {
             const alertBox = document.createElement('div');
             alertBox.classList.add('custom-alert', 'bg-white', 'p-6', 'rounded-lg', 'shadow-xl', 'text-center', 'fixed', 'top-1/2', 'left-1/2', 'transform', '-translate-x-1/2', '-translate-y-1/2', 'z-[2000]', 'max-w-xs');
@@ -314,8 +309,14 @@
             style: style_Subdivisiones20232024_2_0,
         });
         bounds_group.addLayer(layer_Subdivisiones20232024_2);
+        
+        // --- Cambios para asegurar que las capas se añadan correctamente ---
+        // 1. Añadimos la capa de Google Satellite al mapa de inmediato
+        map.addLayer(layer_GoogleSatellite_1);
+        // 2. Añadimos la capa de subdivisiones al mapa de inmediato
         map.addLayer(layer_Subdivisiones20232024_2);
 
+        // --- Configuración del control de capas (leyenda) ---
         var overlaysTree = [
             {
                 label: '<b>Capas de Información</b>',
@@ -338,7 +339,6 @@
         });
         lay.addTo(map);
 
-        map.addLayer(layer_GoogleSatellite_1);
         setBounds();
 
         var coordSearchMarker = null;
