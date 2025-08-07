@@ -19,14 +19,14 @@
                 height: 100%;
                 padding: 0;
                 margin: 0;
-                font-family: Arial, sans-serif; /* Un estilo de fuente común */
+                font-family: Arial, sans-serif;
                 display: flex;
-                flex-direction: column; /* Organiza la cabecera, el mapa y el menú en columna */
+                flex-direction: column;
             }
 
             /* Estilos de la nueva cabecera */
             #app-header {
-                background-color: #007bff; /* Fondo azul */
+                background-color: #007bff;
                 color: white;
                 padding: 10px 20px;
                 display: flex;
@@ -38,43 +38,29 @@
                 font-size: 1.2em;
                 font-weight: bold;
             }
-            .header-nav {
-                display: flex;
-                gap: 20px;
-            }
-            .header-nav .nav-item {
-                color: white;
-                text-decoration: none;
-                text-align: center;
-                font-size: 0.8em;
-            }
-            .header-nav .nav-item i {
-                font-size: 1.5em;
-                display: block;
-                margin-bottom: 3px;
-            }
+            /* Se eliminan los estilos de .header-nav y .header-nav .nav-item */
             
             /* Ajustar el contenedor principal para que el mapa y el menú estén lado a lado */
             #main-container {
                 display: flex;
-                flex-grow: 1; /* Permite que este contenedor ocupe el espacio restante */
+                flex-grow: 1;
             }
 
             /* Ajustar el mapa y el menú para que se adapten a la nueva estructura */
             #map {
-                flex-grow: 1; /* Ocupa el espacio restante horizontalmente */
-                height: 100%; /* Ocupa la altura completa del contenedor principal */
-                margin-right: 320px; /* Ajusta este valor si cambias el ancho del menú */
+                flex-grow: 1;
+                height: 100%;
+                margin-right: 320px;
             }
 
             /* Estilos para el menú lateral derecho */
             #side-menu {
-                position: fixed; /* Ahora es fijo para no desplazar el mapa */
-                top: 60px; /* Deja espacio para la cabecera */
+                position: fixed;
+                top: 60px;
                 right: 0;
-                width: 320px; /* Ajuste para un ancho un poco mayor */
-                height: calc(100% - 60px); /* Ajusta la altura para que no se superponga con la cabecera */
-                background-color: #f8f9fa; /* Color de fondo claro */
+                width: 320px;
+                height: calc(100% - 60px);
+                background-color: #f8f9fa;
                 box-shadow: -2px 0 8px rgba(0,0,0,0.15);
                 z-index: 1000;
                 padding: 20px;
@@ -92,7 +78,7 @@
                 padding: 15px;
                 border-radius: 5px;
                 box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-                margin-bottom: 20px; /* Espacio entre buscadores */
+                margin-bottom: 20px;
                 border: none;
                 z-index: auto;
             }
@@ -103,7 +89,7 @@
                 padding: 15px;
                 border-radius: 5px;
                 box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-                flex-grow: 1; /* Para que ocupe el espacio restante en el menú */
+                flex-grow: 1;
                 overflow-y: auto;
             }
 
@@ -185,8 +171,8 @@
             .leaflet-control-layers {
                 z-index: 900;
                 position: absolute;
-                top: 70px; /* Bajar la leyenda para que no choque con la cabecera */
-                right: 330px; /* Ancho del menú (320px) + un pequeño margen (10px) */
+                top: 70px;
+                right: 330px;
                 left: unset;
             }
             .leaflet-control-layers-base span {
@@ -302,17 +288,12 @@
             #rolSugerencias .sugerencia-item:hover {
                 background-color: #f0f0f0;
             }
-
         </style>
         <title></title>
     </head>
     <body>
         <div id="app-header">
             <span class="header-title">INFORMACIÓN TERRITORIAL DE LA COMUNA DE VILLARRICA</span>
-            <div class="header-nav">
-                <a href="#" class="nav-item"><i class="fas fa-home"></i><br><span>Inicio</span></a>
-                <a href="#" class="nav-item"><i class="fas fa-search-location"></i><br><span>Buscar ROL</span></a>
-            </div>
         </div>
         
         <div id="main-container">
