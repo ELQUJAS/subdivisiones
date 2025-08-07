@@ -38,7 +38,6 @@
         .hover-bg-villarrica-orange-dark { background-color: #CC8400; }
         .bg-villarrica-green { background-color: #28a745; /* Verde del árbol */ }
         .hover-bg-villarrica-green-dark { background-color: #1e7e34; }
-
         /* Estilos para que el mapa y los controles de Leaflet se integren */
         html, body {
             width: 100%;
@@ -185,8 +184,11 @@
         }
 
         var map = L.map('map', {
-            zoomControl:false, maxZoom:28, minZoom:1
+            zoomControl: false, 
+            maxZoom: 28, 
+            minZoom: 1
         }).fitBounds([[-39.488026856932365,-72.57521476301702],[-38.93965966064718,-71.53962273072693]]);
+        
         var hash = new L.Hash(map);
         map.attributionControl.setPrefix('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a>');
         var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
@@ -218,13 +220,9 @@
             }
         }
         
-        var zoomControl = L.control.zoom({
-            position: 'topleft'
-        }).addTo(map);
-        var bounds_group = new L.featureGroup([]);
-        function setBounds() {
-        }
+        // --- INICIALIZACIÓN DE CAPAS Y CONTROLES ---
         
+        // Capas base
         map.createPane('pane_OpenStreetMap_0');
         map.getPane('pane_OpenStreetMap_0').style.zIndex = 400;
         var layer_OpenStreetMap_0 = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -249,12 +247,13 @@
             maxNativeZoom: 22
         });
 
+        // Capa de información (Subdivisiones)
         function pop_Subdivisiones20232024_2(feature, layer) {
             function createDetails(summaryText, contentValue) {
                 var displayValue = (contentValue === null || contentValue === '') ? 'Sin información' : String(contentValue).replace(/'/g, '\'').toLocaleString();
                 return `<details class="group border-b border-gray-200 pb-2"><summary class="flex justify-between items-center font-medium cursor-pointer text-blue-700 hover:text-blue-800 py-1 transition-colors duration-200"><span>${summaryText}</span><svg class="w-5 h-5 transition-transform duration-200 group-open:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></summary><div class="mt-2 text-sm text-gray-600 pl-4"><p>${autolinker.link(displayValue)}</p></div></details>`;
             }
-
+            // Lógica de creación del contenido del popup (mantenido del script original)
             var popupContent = '<div class="space-y-3">';
             popupContent += `<div class="flex justify-between items-center py-2 border-b border-gray-200 last:border-b-0"><span class="font-medium text-gray-700">ROL:</span><span class="text-gray-900 font-semibold">${autolinker.link(String(feature.properties['rol'] !== null ? feature.properties['rol'] : 'No disponible'))}</span></div>`;
             popupContent += createDetails('ZONA PRI', feature.properties['ZONA PRI']);
@@ -273,7 +272,6 @@
             popupContent += `<p><span class="font-bold">DESTINO:</span> ${autolinker.link(String(feature.properties['DESTINO'] !== null ? feature.properties['DESTINO'] : 'Sin información'))}</p>`;
             popupContent += `<p><span class="font-bold">RECEPCIÓN:</span> ${autolinker.link(String(feature.properties['RECEPCIÓN'] !== null ? feature.properties['RECEPCIÓN'] : 'Sin información'))}</p>`;
             popupContent += '</div></details></div>';
-
             return popupContent;
         }
 
@@ -310,11 +308,19 @@
             },
             style: style_Subdivisiones20232024_2_0,
         });
+        
+        var bounds_group = new L.featureGroup([]);
         bounds_group.addLayer(layer_Subdivisiones20232024_2);
         
+        // AÑADIMOS LAS CAPAS AL MAPA
         map.addLayer(layer_GoogleSatellite_1);
         map.addLayer(layer_Subdivisiones20232024_2);
-
+        
+        // Inicializamos y añadimos los controles del mapa
+        var zoomControl = L.control.zoom({
+            position: 'topleft'
+        }).addTo(map);
+        
         var overlaysTree = [
             {
                 label: '<b>Capas de Información</b>',
@@ -337,6 +343,13 @@
         });
         lay.addTo(map);
 
+        function setBounds() {
+            if (bounds_group.getLayers().length) {
+                map.fitBounds(bounds_group.getBounds());
+            }
+            map.invalidateSize();
+        }
+        
         setBounds();
 
         var coordSearchMarker = null;
@@ -364,6 +377,7 @@
         const resultadoRolDiv = document.getElementById('resultadoBusquedaRol');
         const rolSugerenciasDiv = document.getElementById('rolSugerencias');
         
+        // Visor de coordenadas
         var MouseCoordinateDisplay = L.Control.extend({
             onAdd: function(map) {
                 var container = L.DomUtil.create('div', 'coordinate-display leaflet-control');
@@ -376,7 +390,6 @@
             onRemove: function(map) {}
         });
 
-        // --- CORRECCIÓN: Agregar el visor de coordenadas al mapa ---
         var mouseCoordinateDisplay = new MouseCoordinateDisplay({position: 'bottomleft'}).addTo(map);
         var mouseCoordDisplayElement = document.getElementById('mouseCoordDisplay');
 
