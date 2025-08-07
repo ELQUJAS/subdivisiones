@@ -12,46 +12,101 @@
         <link rel="stylesheet" href="css/fontawesome-all.min.css">
         <link rel="stylesheet" href="css/leaflet.photon.css">
         <style>
-            html, body, #map {
+            /* --- Estilos para lograr el diseño de la imagen --- */
+            /* Estilos generales */
+            html, body {
                 width: 100%;
                 height: 100%;
                 padding: 0;
                 margin: 0;
+                font-family: Arial, sans-serif; /* Un estilo de fuente común */
+                display: flex;
+                flex-direction: column; /* Organiza la cabecera, el mapa y el menú en columna */
             }
+
+            /* Estilos de la nueva cabecera */
+            #app-header {
+                background-color: #007bff; /* Fondo azul */
+                color: white;
+                padding: 10px 20px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            }
+            .header-title {
+                font-size: 1.2em;
+                font-weight: bold;
+            }
+            .header-nav {
+                display: flex;
+                gap: 20px;
+            }
+            .header-nav .nav-item {
+                color: white;
+                text-decoration: none;
+                text-align: center;
+                font-size: 0.8em;
+            }
+            .header-nav .nav-item i {
+                font-size: 1.5em;
+                display: block;
+                margin-bottom: 3px;
+            }
+            
+            /* Ajustar el contenedor principal para que el mapa y el menú estén lado a lado */
+            #main-container {
+                display: flex;
+                flex-grow: 1; /* Permite que este contenedor ocupe el espacio restante */
+            }
+
+            /* Ajustar el mapa y el menú para que se adapten a la nueva estructura */
+            #map {
+                flex-grow: 1; /* Ocupa el espacio restante horizontalmente */
+                height: 100%; /* Ocupa la altura completa del contenedor principal */
+                margin-right: 320px; /* Ajusta este valor si cambias el ancho del menú */
+            }
+
             /* Estilos para el menú lateral derecho */
             #side-menu {
-                position: absolute;
-                top: 0;
+                position: fixed; /* Ahora es fijo para no desplazar el mapa */
+                top: 60px; /* Deja espacio para la cabecera */
                 right: 0;
-                width: 300px; /* Ancho del menú */
-                height: 100%;
-                background-color: rgba(255, 255, 255, 0.95);
+                width: 320px; /* Ajuste para un ancho un poco mayor */
+                height: calc(100% - 60px); /* Ajusta la altura para que no se superponga con la cabecera */
+                background-color: #f8f9fa; /* Color de fondo claro */
                 box-shadow: -2px 0 8px rgba(0,0,0,0.15);
-                z-index: 1000; /* Asegura que esté por encima del mapa */
-                padding: 15px;
+                z-index: 1000;
+                padding: 20px;
                 box-sizing: border-box;
-                overflow-y: auto; /* Permite desplazamiento si el contenido es largo */
-                display: flex; /* Para organizar el contenido dentro */
+                overflow-y: auto;
+                display: flex;
                 flex-direction: column;
             }
 
-            /* Ajustar el mapa para que no quede debajo del menú */
-            #map {
-                margin-right: 300px; /* Misma anchura que el menú */
+            /* Estilos para los buscadores */
+            .coordenadas-buscador, .rol-buscador {
+                position: static;
+                width: 100%;
+                background-color: white;
+                padding: 15px;
+                border-radius: 5px;
+                box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+                margin-bottom: 20px; /* Espacio entre buscadores */
+                border: none;
+                z-index: auto;
+            }
+            
+            /* Estilo para el contenedor de información del ROL */
+            #rol-info-display {
+                background-color: white;
+                padding: 15px;
+                border-radius: 5px;
+                box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+                flex-grow: 1; /* Para que ocupe el espacio restante en el menú */
+                overflow-y: auto;
             }
 
-            /* Estilos para los buscadores (adaptados al menú) */
-            .coordenadas-buscador,
-            .rol-buscador { 
-                position: static; 
-                width: 100%; /* Ocupa todo el ancho del menú */
-                margin-bottom: 20px; /* Espacio entre buscadores */
-                background-color: transparent; /* Fondo transparente dentro del menú */
-                box-shadow: none; /* Sin sombra para integrarse mejor */
-                border: none; /* Sin borde */
-                padding: 0; /* Sin padding adicional */
-                z-index: auto; 
-            }
             /* Mantener los estilos específicos de input y button */
             .coordenadas-buscador input,
             .rol-buscador input {
@@ -105,7 +160,7 @@
             }
 
             .rol-buscador button {
-                background-color: #28a745; /* Color verde para el botón de rol */
+                background-color: #28a745;
             }
 
             .rol-buscador button:hover {
@@ -128,16 +183,14 @@
 
             /* Estilos para el control de capas (leyenda) */
             .leaflet-control-layers {
-                z-index: 900; /* Ligeramente menor que el menú para que el menú esté siempre encima */
+                z-index: 900;
                 position: absolute;
-                top: 10px;
-                /* CAMBIO: Ubicación de la leyenda a la izquierda del menú lateral */
-                right: 310px; /* Ancho del menú (300px) + un pequeño margen (10px) */
-                left: unset; 
+                top: 70px; /* Bajar la leyenda para que no choque con la cabecera */
+                right: 330px; /* Ancho del menú (320px) + un pequeño margen (10px) */
+                left: unset;
             }
-            /* Estos estilos ya están bien para el modo pestaña oculta */
             .leaflet-control-layers-base span {
-                /* display: none; */ 
+                /* display: none; */
             }
             .leaflet-control-layers-expanded .leaflet-control-layers-list {
                 display: block;
@@ -229,7 +282,7 @@
                 border-top: none;
                 background-color: white;
                 box-sizing: border-box;
-                position: absolute; 
+                position: absolute;
                 z-index: 1001;
                 display: none;
             }
@@ -254,14 +307,24 @@
         <title></title>
     </head>
     <body>
-        <div id="map"></div>
-        <div id="side-menu">
-            <h3>Buscadores</h3>
-            <div id="coord-search-container"></div>
-            <div id="rol-search-container"></div>
-            <h4>Información de ROL</h4>
-            <div id="rol-info-display">
-                <p>Aquí se mostrará la información del ROL buscado.</p>
+        <div id="app-header">
+            <span class="header-title">INFORMACIÓN TERRITORIAL DE LA COMUNA DE VILLARRICA</span>
+            <div class="header-nav">
+                <a href="#" class="nav-item"><i class="fas fa-home"></i><br><span>Inicio</span></a>
+                <a href="#" class="nav-item"><i class="fas fa-search-location"></i><br><span>Buscar ROL</span></a>
+            </div>
+        </div>
+        
+        <div id="main-container">
+            <div id="map"></div>
+            <div id="side-menu">
+                <h3>Buscadores</h3>
+                <div id="coord-search-container"></div>
+                <div id="rol-search-container"></div>
+                <h4>Información de ROL</h4>
+                <div id="rol-info-display">
+                    <p>Aquí se mostrará la información del ROL buscado.</p>
+                </div>
             </div>
         </div>
 
@@ -284,7 +347,7 @@
             var hash = new L.Hash(map);
             map.attributionControl.setPrefix('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a>');
             var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
-            // remove popup's row if "visible-with-data"
+            
             function removeEmptyRowsFromPopupContent(content, feature) {
                 var tempDiv = document.createElement('div');
                 tempDiv.innerHTML = content;
@@ -298,16 +361,15 @@
                 }
                 return tempDiv.innerHTML;
             }
-            // add class to format popup if it contains media
+
             function addClassToPopupIfMedia(content, popup) {
                 var tempDiv = document.createElement('div');
                 tempDiv.innerHTML = content;
                 if (tempDiv.querySelector('td img')) {
                     popup._contentNode.classList.add('media');
-                         // Delay to force the redraw
-                         setTimeout(function() {
-                             popup.update();
-                         }, 10);
+                    setTimeout(function() {
+                        popup.update();
+                    }, 10);
                 } else {
                     popup._contentNode.classList.remove('media');
                 }
@@ -348,13 +410,11 @@
             function pop_Subdivisiones20232024_2(feature, layer) {
                 var popupContent = '<h4>ROL: ' + (feature.properties['rol'] !== null ? autolinker.link(String(feature.properties['rol']).replace(/'/g, '\'').toLocaleString()) : 'No disponible') + '</h4>';
                 
-                // Función auxiliar para crear un desplegable individual
                 function createDetails(summaryText, contentValue) {
                     var displayValue = (contentValue === null || contentValue === '') ? 'Sin información' : autolinker.link(String(contentValue).replace(/'/g, '\'').toLocaleString());
                     return '<details><summary>' + summaryText + '</summary><p>' + displayValue + '</p></details>';
                 }
 
-                // Campos que permanecen como desplegables de primer nivel
                 popupContent += createDetails('ZONA PRI', feature.properties['ZONA PRI']);
                 popupContent += createDetails('ZONA/SECTOR', feature.properties['ZONA']);
                 popupContent += createDetails('ZOIT', feature.properties['ZOIT']);
@@ -362,12 +422,9 @@
                 popupContent += createDetails('COMUNIDAD INDÍGENA', feature.properties['COMUNIDAD']);
                 popupContent += createDetails('CONSTRUCCIONES', feature.properties['CONSTRUC.']);
                 
-                // --- Bloque para la estructura anidada de APROBACIÓN PERMISO ---
-                // Ahora, el texto del resumen incluye la información del campo 'APROBACIÓ'
                 var aprobacionValue = (feature.properties['APROBACIÓ'] === null || feature.properties['APROBACIÓ'] === '') ? 'Sin información' : autolinker.link(String(feature.properties['APROBACIÓ']).replace(/'/g, '\'').toLocaleString());
                 popupContent += `<details><summary>APROBACIÓN PERMISO: ${aprobacionValue}</summary><div style="padding-left: 15px;">`;
                 
-                // Agrega los desplegables anidados dentro del principal
                 popupContent += createDetails('FECHA', feature.properties['FECHA']);
                 popupContent += createDetails('UBICACIÓN', feature.properties['UBICACIÓN']);
                 popupContent += createDetails('PROPIETARIO', feature.properties['PROPIETARI']);
@@ -375,12 +432,10 @@
                 popupContent += createDetails('DESTINO', feature.properties['DESTINO']);
                 popupContent += createDetails('RECEPCIÓN', feature.properties['RECEPCIÓN']);
 
-                // Cierra el desplegable principal
                 popupContent += '</div></details>';
-                // --- Fin del bloque ---
 
                 var contentDiv = document.createElement('div');
-                contentDiv.innerHTML = popupContent; 
+                contentDiv.innerHTML = popupContent;
                 return removeEmptyRowsFromPopupContent(contentDiv.innerHTML, feature);
             }
 
@@ -412,9 +467,8 @@
                         return pop_Subdivisiones20232024_2(feature, layer);
                     }, { maxHeight: 400 });
                     layer.on('popupopen', function(e) {
-                          addClassToPopupIfMedia(pop_Subdivisiones20232024_2(feature, layer), e.popup);
+                            addClassToPopupIfMedia(pop_Subdivisiones20232024_2(feature, layer), e.popup);
                     });
-                    // Clic en la capa para mostrar info en el menú
                     layer.on('click', function() {
                         const rolInfoHtml = pop_Subdivisiones20232024_2(feature, layer);
                         document.getElementById('rol-info-display').innerHTML = rolInfoHtml;
@@ -444,8 +498,8 @@
             ];
 
             var lay = L.control.layers.tree(null, overlaysTree, {
-                collapsed: true, 
-                position: 'topright' // Esta es la posición general, el CSS la moverá a la izquierda del menú
+                collapsed: true,
+                position: 'topright'
             });
             lay.addTo(map);
 
@@ -453,11 +507,9 @@
 
             setBounds();
 
-            // Variables globales para almacenar los marcadores temporales
             var coordSearchMarker = null;
-            var rolSearchMarker = null; 
+            var rolSearchMarker = null;
             
-            // Función para limpiar cualquier marcador temporal activo y popups de búsqueda
             function cleanUpTemporaryMarkers() {
                 if (coordSearchMarker) {
                     map.removeLayer(coordSearchMarker);
@@ -467,10 +519,7 @@
                     map.removeLayer(rolSearchMarker);
                     rolSearchMarker = null;
                 }
-                
-                // Nota: Ya no cerramos el popup aquí
-                // map.closePopup(); 
-                hideRolSuggestions(); 
+                hideRolSuggestions();
             }
             
             const coordSearchContainer = document.getElementById('coord-search-container');
@@ -481,7 +530,7 @@
             // --- Buscador de Coordenadas: Ahora se crea dinámicamente como un control personalizado ---
             var CoordsSearchControl = L.Control.extend({
                 onAdd: function(map) {
-                    var container = L.DomUtil.create('div', 'coordenadas-buscador'); 
+                    var container = L.DomUtil.create('div', 'coordenadas-buscador');
                     container.innerHTML = `
                         <input type="text" id="coordenadasInput" placeholder="Lat, Lon (ej: -39.28 -72.24)">
                         <button id="buscarCoordenadas">Buscar</button>
@@ -491,13 +540,13 @@
                     L.DomEvent.disableClickPropagation(container);
                     L.DomEvent.disableScrollPropagation(container);
 
-                    return container; 
+                    return container;
                 },
                 onRemove: function(map) { }
             });
 
-            var coordsSearchControlInstance = new CoordsSearchControl(); 
-            coordSearchContainer.appendChild(coordsSearchControlInstance.onAdd(map)); 
+            var coordsSearchControlInstance = new CoordsSearchControl();
+            coordSearchContainer.appendChild(coordsSearchControlInstance.onAdd(map));
 
             const coordenadasInput = coordSearchContainer.querySelector('#coordenadasInput');
             const buscarBoton = coordSearchContainer.querySelector('#buscarCoordenadas');
@@ -515,33 +564,25 @@
             });
 
             buscarBoton.addEventListener('click', function() {
-                cleanUpTemporaryMarkers(); 
-
+                cleanUpTemporaryMarkers();
                 const inputValue = coordenadasInput.value.trim();
                 const parts = inputValue.split(/\s+/);
-
                 resultadoDiv.textContent = '';
-
                 if (parts.length !== 2) {
                     resultadoDiv.textContent = 'Formato: Lat, Lon';
                     return;
                 }
-
                 const lat = parseFloat(parts[0]);
                 const lng = parseFloat(parts[1]);
-
                 if (isNaN(lat) || isNaN(lng)) {
                     resultadoDiv.textContent = 'Coordenadas inválidas.';
                     return;
                 }
-
                 map.setView([lat, lng], 15);
-
                 coordSearchMarker = L.marker([lat, lng]).addTo(map);
-                const formattedLat = lat.toFixed(6); 
+                const formattedLat = lat.toFixed(6);
                 const formattedLng = lng.toFixed(6);
                 coordSearchMarker.bindPopup(`<b>Coordenadas:</b><br>${formattedLat}, ${formattedLng}`).openPopup();
-
                 coordSearchMarker.on('popupclose', function() {
                     cleanUpTemporaryMarkers();
                 });
@@ -555,14 +596,13 @@
             var MouseCoordinateDisplay = L.Control.extend({
                 onAdd: function(map) {
                     var container = L.DomUtil.create('div', 'coordinate-display leaflet-control');
-                    container.id = 'mouseCoordDisplay'; 
+                    container.id = 'mouseCoordDisplay';
                     container.innerHTML = `Lat: --.-- Lon: --.--`;
                     L.DomEvent.disableClickPropagation(container);
                     L.DomEvent.disableScrollPropagation(container);
                     return container;
                 },
                 onRemove: function(map) {
-                    // Nada que hacer aquí
                 }
             });
 
@@ -570,7 +610,7 @@
             var mouseCoordDisplayElement = document.getElementById('mouseCoordDisplay');
 
             map.on('mousemove', function(e) {
-                var lat = e.latlng.lat.toFixed(6); 
+                var lat = e.latlng.lat.toFixed(6);
                 var lon = e.latlng.lng.toFixed(6);
                 mouseCoordDisplayElement.innerHTML = `Lat: ${lat} Lon: ${lon}`;
             });
@@ -582,7 +622,7 @@
             // --- Buscador de ROL ---
             var RolSearchControl = L.Control.extend({
                 onAdd: function(map) {
-                    var container = L.DomUtil.create('div', 'rol-buscador'); 
+                    var container = L.DomUtil.create('div', 'rol-buscador');
                     container.innerHTML = `
                         <input type="text" id="rolInput" placeholder="Buscar ROL (ej: 1234-5)">
                         <button id="buscarRol">Buscar ROL</button>
@@ -592,25 +632,24 @@
                     L.DomEvent.disableClickPropagation(container);
                     L.DomEvent.disableScrollPropagation(container);
 
-                    return container; 
+                    return container;
                 },
                 onRemove: function(map) { }
             });
 
-            var rolSearchControlInstance = new RolSearchControl(); 
-            rolSearchContainer.appendChild(rolSearchControlInstance.onAdd(map)); 
+            var rolSearchControlInstance = new RolSearchControl();
+            rolSearchContainer.appendChild(rolSearchControlInstance.onAdd(map));
 
             const rolInput = rolSearchContainer.querySelector('#rolInput');
             const buscarRolBoton = rolSearchContainer.querySelector('#buscarRol');
             const resultadoRolDiv = rolSearchContainer.querySelector('#resultadoBusquedaRol');
-            const rolSugerenciasDiv = rolSearchContainer.querySelector('#rolSugerencias'); 
-
+            const rolSugerenciasDiv = rolSearchContainer.querySelector('#rolSugerencias');
 
             var rolIcon = L.divIcon({
-                className: 'rol-marker-icon fas fa-map-marker-alt', 
+                className: 'rol-marker-icon fas fa-map-marker-alt',
                 iconSize: [30, 30],
-                iconAnchor: [15, 30], 
-                popupAnchor: [0, -25] 
+                iconAnchor: [15, 30],
+                popupAnchor: [0, -25]
             });
 
             function hideRolSuggestions() {
@@ -619,15 +658,15 @@
             }
 
             rolInput.addEventListener('input', function() {
-                resultadoRolDiv.textContent = ''; 
+                resultadoRolDiv.textContent = '';
                 const searchTerm = rolInput.value.trim().toLowerCase();
                 
-                if (searchTerm.length < 1) { 
+                if (searchTerm.length < 1) {
                     hideRolSuggestions();
                     return;
                 }
 
-                const matchingRoles = new Set(); 
+                const matchingRoles = new Set();
                 layer_Subdivisiones20232024_2.eachLayer(function(layer) {
                     if (layer.feature && layer.feature.properties && layer.feature.properties['rol'] !== null) {
                         const rol = String(layer.feature.properties['rol']).trim().toLowerCase();
@@ -638,23 +677,22 @@
                 });
 
                 const sortedRoles = Array.from(matchingRoles).sort();
-
-                rolSugerenciasDiv.innerHTML = ''; 
+                rolSugerenciasDiv.innerHTML = '';
 
                 if (sortedRoles.length > 0) {
-                    sortedRoles.slice(0, 10).forEach(rol => { 
+                    sortedRoles.slice(0, 10).forEach(rol => {
                         const suggestionItem = document.createElement('div');
                         suggestionItem.classList.add('sugerencia-item');
                         suggestionItem.textContent = rol;
-                        suggestionItem.addEventListener('mousedown', function(e) { 
-                            e.preventDefault(); 
-                            rolInput.value = rol; 
-                            hideRolSuggestions(); 
-                            buscarRolBoton.click(); 
+                        suggestionItem.addEventListener('mousedown', function(e) {
+                            e.preventDefault();
+                            rolInput.value = rol;
+                            hideRolSuggestions();
+                            buscarRolBoton.click();
                         });
                         rolSugerenciasDiv.appendChild(suggestionItem);
                     });
-                    rolSugerenciasDiv.style.display = 'block'; 
+                    rolSugerenciasDiv.style.display = 'block';
                 } else {
                     hideRolSuggestions();
                 }
@@ -664,29 +702,23 @@
                 if (!rolSearchContainer.contains(e.originalEvent.target)) {
                     hideRolSuggestions();
                 }
-
-                // Esta parte ahora no afecta al clic en el polígono
                 if (!e.originalEvent.target.closest('.leaflet-popup') && !e.originalEvent.target.closest('.leaflet-marker-icon')) {
-                     // No limpiamos los marcadores aquí para que el clic en la capa funcione
                 }
             });
 
-
             rolInput.addEventListener('blur', function() {
-                setTimeout(() => { 
+                setTimeout(() => {
                     if (!rolSugerenciasDiv.contains(document.activeElement) && document.activeElement !== rolInput) {
                         hideRolSuggestions();
                     }
                 }, 100);
             });
 
-
             buscarRolBoton.addEventListener('click', function() {
-                cleanUpTemporaryMarkers(); 
-
+                cleanUpTemporaryMarkers();
                 const rolValue = rolInput.value.trim();
                 resultadoRolDiv.textContent = '';
-                hideRolSuggestions(); 
+                hideRolSuggestions();
 
                 if (!rolValue) {
                     resultadoRolDiv.textContent = 'Por favor, ingrese un ROL.';
@@ -697,23 +729,23 @@
                 layer_Subdivisiones20232024_2.eachLayer(function(layer) {
                     if (layer.feature && layer.feature.properties && String(layer.feature.properties['rol']).trim().toLowerCase() === rolValue.toLowerCase()) {
                         foundFeature = layer;
-                        return; 
+                        return;
                     }
                 });
 
                 if (foundFeature) {
                     const center = foundFeature.getBounds().getCenter();
-                    map.setView(center, 17); 
+                    map.setView(center, 17);
 
                     rolSearchMarker = L.marker(center, {icon: rolIcon}).addTo(map);
-                    rolSearchMarker.bindPopup(`<b>ROL Encontrado:</b> ${rolValue}`); 
-                    rolSearchMarker.openPopup(); 
+                    rolSearchMarker.bindPopup(`<b>ROL Encontrado:</b> ${rolValue}`);
+                    rolSearchMarker.openPopup();
 
                     const rolInfoHtml = pop_Subdivisiones20232024_2(foundFeature.feature, foundFeature);
                     rolInfoDisplay.innerHTML = rolInfoHtml;
 
                     rolSearchMarker.on('popupclose', function() {
-                        cleanUpTemporaryMarkers(); 
+                        cleanUpTemporaryMarkers();
                     });
 
                 } else {
