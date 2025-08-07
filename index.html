@@ -13,15 +13,16 @@
         <link rel="stylesheet" href="css/leaflet.photon.css">
         <style>
             /* --- Estilos para lograr el diseño de la imagen --- */
-            /* Estilos generales */
-            html, body {
-                width: 100%;
-                height: 100%;
-                padding: 0;
-                margin: 0;
-                font-family: Arial, sans-serif;
+            /* Estilos generales del cuerpo, con un color de fondo para el "marco" */
+            body {
+                background-color: #eef2f5; /* Un gris claro para el fondo */
                 display: flex;
                 flex-direction: column;
+                height: 100vh; /* Ocupa el 100% de la altura del viewport */
+                margin: 0;
+                padding: 0;
+                font-family: Arial, sans-serif;
+                overflow: hidden; /* Oculta cualquier scroll inesperado */
             }
 
             /* Estilos de la nueva cabecera */
@@ -33,34 +34,38 @@
                 justify-content: space-between;
                 align-items: center;
                 box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+                height: 60px; /* Altura fija para el encabezado */
+                flex-shrink: 0; /* No permite que se encoja */
             }
             .header-title {
                 font-size: 1.2em;
                 font-weight: bold;
             }
-            /* Se eliminan los estilos de .header-nav y .header-nav .nav-item */
-            
-            /* Ajustar el contenedor principal para que el mapa y el menú estén lado a lado */
-            #main-container {
+
+            /* Contenedor principal que contendrá el mapa y el menú */
+            #main-content {
                 display: flex;
                 flex-grow: 1;
+                position: relative; /* Contenedor para posicionar elementos absolutos */
             }
 
-            /* Ajustar el mapa y el menú para que se adapten a la nueva estructura */
+            /* Ajustar el mapa para que tenga un "marco" visible */
             #map {
-                flex-grow: 1;
+                width: 100%;
                 height: 100%;
-                margin-right: 320px;
+                margin: 20px; /* Margen alrededor del mapa */
+                border-radius: 10px; /* Bordes redondeados */
+                box-shadow: 0 4px 10px rgba(0,0,0,0.1); /* Sombra para el efecto de tarjeta */
             }
-
+            
             /* Estilos para el menú lateral derecho */
             #side-menu {
-                position: fixed;
-                top: 60px;
+                position: absolute;
+                top: 0;
                 right: 0;
                 width: 320px;
-                height: calc(100% - 60px);
-                background-color: #f8f9fa;
+                height: 100%;
+                background-color: rgba(255, 255, 255, 0.95);
                 box-shadow: -2px 0 8px rgba(0,0,0,0.15);
                 z-index: 1000;
                 padding: 20px;
@@ -70,10 +75,17 @@
                 flex-direction: column;
             }
 
-            /* Estilos para los buscadores */
+            /* Estilos para los títulos del menú */
+            #side-menu h3, #side-menu h4 {
+                color: #555;
+                margin-top: 0;
+                margin-bottom: 10px;
+                padding-bottom: 5px;
+                border-bottom: 1px solid #ddd;
+            }
+
+            /* Estilos para los buscadores con efecto de tarjeta */
             .coordenadas-buscador, .rol-buscador {
-                position: static;
-                width: 100%;
                 background-color: white;
                 padding: 15px;
                 border-radius: 5px;
@@ -93,7 +105,7 @@
                 overflow-y: auto;
             }
 
-            /* Mantener los estilos específicos de input y button */
+            /* Mantener los estilos específicos de input y button (son correctos) */
             .coordenadas-buscador input,
             .rol-buscador input {
                 width: 100%;
@@ -133,32 +145,14 @@
                 transition: background-color 0.2s ease-in-out;
             }
 
-            .coordenadas-buscador button {
-                background-color: #007bff;
-            }
+            .coordenadas-buscador button { background-color: #007bff; }
+            .coordenadas-buscador button:hover { background-color: #0056b3; }
+            .coordenadas-buscador button:active { background-color: #004085; }
+            .rol-buscador button { background-color: #28a745; }
+            .rol-buscador button:hover { background-color: #218838; }
+            .rol-buscador button:active { background-color: #1e7e34; }
 
-            .coordenadas-buscador button:hover {
-                background-color: #0056b3;
-            }
-
-            .coordenadas-buscador button:active {
-                background-color: #004085;
-            }
-
-            .rol-buscador button {
-                background-color: #28a745;
-            }
-
-            .rol-buscador button:hover {
-                background-color: #218838;
-            }
-
-            .rol-buscador button:active {
-                background-color: #1e7e34;
-            }
-
-            #resultadoBusqueda,
-            #resultadoBusquedaRol {
+            #resultadoBusqueda, #resultadoBusquedaRol {
                 font-size: 0.8em;
                 margin-top: 5px;
                 color: #dc3545;
@@ -171,11 +165,11 @@
             .leaflet-control-layers {
                 z-index: 900;
                 position: absolute;
-                top: 70px;
-                right: 330px;
+                top: 80px; /* Bajar la leyenda */
+                right: 350px; /* Margen para no chocar con el menú */
                 left: unset;
             }
-            .leaflet-control-layers-base span {
+            .leaflet-control-layers-base span { /* Oculta el texto "Base Maps" */
                 /* display: none; */
             }
             .leaflet-control-layers-expanded .leaflet-control-layers-list {
@@ -192,7 +186,6 @@
                 border-radius: 3px;
                 background-color: #f9f9f9;
             }
-
             #rol-info-display summary {
                 padding: 8px 10px;
                 font-weight: bold;
@@ -200,11 +193,9 @@
                 background-color: #eee;
                 border-bottom: 1px solid #ddd;
             }
-
             #rol-info-display details[open] summary {
                 background-color: #e0e0e0;
             }
-
             #rol-info-display details p {
                 padding: 5px 10px 8px;
                 margin: 0;
@@ -240,8 +231,8 @@
                 text-align: center;
                 z-index: 1000;
                 position: absolute;
-                bottom: 10px;
-                left: 10px;
+                bottom: 30px; /* Elevar para que no se superponga con el margen del mapa */
+                left: 30px;
                 right: unset;
             }
 
@@ -296,7 +287,7 @@
             <span class="header-title">INFORMACIÓN TERRITORIAL DE LA COMUNA DE VILLARRICA</span>
         </div>
         
-        <div id="main-container">
+        <div id="main-content">
             <div id="map"></div>
             <div id="side-menu">
                 <h3>Buscadores</h3>
@@ -513,14 +504,13 @@
                 onAdd: function(map) {
                     var container = L.DomUtil.create('div', 'coordenadas-buscador');
                     container.innerHTML = `
-                        <input type="text" id="coordenadasInput" placeholder="Lat, Lon (ej: -39.28 -72.24)">
+                        <p>Latitud, Longitud (Ej: -33.21, -71.24)</p>
+                        <input type="text" id="coordenadasInput" placeholder="Latitud, Longitud">
                         <button id="buscarCoordenadas">Buscar</button>
                         <div id="resultadoBusqueda"></div>
                     `;
-
                     L.DomEvent.disableClickPropagation(container);
                     L.DomEvent.disableScrollPropagation(container);
-
                     return container;
                 },
                 onRemove: function(map) { }
@@ -547,7 +537,7 @@
             buscarBoton.addEventListener('click', function() {
                 cleanUpTemporaryMarkers();
                 const inputValue = coordenadasInput.value.trim();
-                const parts = inputValue.split(/\s+/);
+                const parts = inputValue.split(/[,\s]+/);
                 resultadoDiv.textContent = '';
                 if (parts.length !== 2) {
                     resultadoDiv.textContent = 'Formato: Lat, Lon';
@@ -605,7 +595,8 @@
                 onAdd: function(map) {
                     var container = L.DomUtil.create('div', 'rol-buscador');
                     container.innerHTML = `
-                        <input type="text" id="rolInput" placeholder="Buscar ROL (ej: 1234-5)">
+                        <p>Buscar ROL (Ej: 1234-5)</p>
+                        <input type="text" id="rolInput" placeholder="Buscar ROL">
                         <button id="buscarRol">Buscar ROL</button>
                         <div id="resultadoBusquedaRol"></div>
                         <div id="rolSugerencias"></div> `;
